@@ -1,0 +1,847 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 CourierNewPSMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;\red88\green137\blue67;
+\red193\green193\blue193;\red183\green111\blue179;\red67\green192\blue160;\red212\green213\blue153;\red141\green213\blue254;
+\red167\green197\blue151;\red71\green138\blue206;\red203\green203\blue202;\red194\green125\blue100;\red67\green180\blue255;
+}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c100000\c100000\c99985\c0;\cssrgb\c41481\c59899\c33082;
+\cssrgb\c80176\c80176\c79976;\cssrgb\c77407\c52698\c75307;\cssrgb\c30631\c78928\c69023;\cssrgb\c86247\c86215\c66392;\cssrgb\c61545\c86704\c99884;
+\cssrgb\c71035\c80830\c65726;\cssrgb\c34146\c61677\c84338;\cssrgb\c83320\c83320\c83112;\cssrgb\c80772\c56796\c46790;\cssrgb\c31469\c76285\c100000;
+}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec4 # pragma pylint: disable=missing-docstring, invalid-name, pointless-string-statement\cb3 \strokec5 \
+\cb3 \strokec4 # flake8: noqa: F401\cb3 \strokec5 \
+\cb3 \strokec4 # isort: skip_file\cb3 \strokec5 \
+\cb3 \strokec4 # --- Do not remove these libs ---\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  numpy \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 np\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 pandas\cb3 \strokec5  \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 pd\cb3 \strokec5 \
+\cb3 \strokec6 from\cb3 \strokec5  \cb3 \strokec7 pandas\cb3 \strokec5  \cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 DataFrame\cb3 \strokec5 \
+\cb3 \strokec6 from\cb3 \strokec5  \cb3 \strokec7 datetime\cb3 \strokec5  \cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 datetime\cb3 \strokec5 \
+\cb3 \strokec6 from\cb3 \strokec5  \cb3 \strokec7 typing\cb3 \strokec5  \cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 Optional\cb3 \strokec5 , \cb3 \strokec7 Union\cb3 \strokec5 \
+\
+\cb3 \strokec6 from\cb3 \strokec5  freqtrade.strategy \cb3 \strokec6 import\cb3 \strokec5  (BooleanParameter, CategoricalParameter, DecimalParameter,\
+                                IntParameter, IStrategy, merge_informative_pair)\
+\
+\cb3 \strokec4 # --------------------------------\cb3 \strokec5 \
+\cb3 \strokec4 # Add your lib to import here\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 random\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  talib.abstract \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  freqtrade.vendor.qtpylib.indicators \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 qtpylib\cb3 \strokec5 \
+\cb3 \strokec6 from\cb3 \strokec5  \cb3 \strokec7 functools\cb3 \strokec5  \cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec8 reduce\cb3 \strokec5 \
+\cb3 \strokec6 from\cb3 \strokec5  \cb3 \strokec7 itertools\cb3 \strokec5  \cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 permutations\cb3 \strokec5 \
+\
+\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 seed\cb3 \strokec5 (\cb3 \strokec10 4\cb3 \strokec5 )\
+\
+\
+\cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\cb3 \strokec9 profiles\cb3 \strokec5 , \cb3 \strokec9 max_indicators\cb3 \strokec12 =\cb3 \strokec10 2\cb3 \strokec5 , \cb3 \strokec9 include_none\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 ):\
+    \cb3 \strokec9 profile_permutations\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 set\cb3 \strokec5 ()\
+    \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 include_none\cb3 \strokec5 :\
+        \cb3 \strokec9 profile_permutations\cb3 \strokec5 .\cb3 \strokec8 add\cb3 \strokec5 (\cb3 \strokec13 "NONE"\cb3 \strokec5 )\
+\
+    \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 i\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec7 range\cb3 \strokec5 (\cb3 \strokec10 1\cb3 \strokec5 , \cb3 \strokec8 len\cb3 \strokec5 (\cb3 \strokec9 profiles\cb3 \strokec5 )\cb3 \strokec12 +\cb3 \strokec10 1\cb3 \strokec5 ):\
+        \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 perm\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec7 permutations\cb3 \strokec5 (\cb3 \strokec9 profiles\cb3 \strokec5 , \cb3 \strokec9 i\cb3 \strokec5 ):\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec8 len\cb3 \strokec5 (\cb3 \strokec9 perm\cb3 \strokec5 ) \cb3 \strokec12 <=\cb3 \strokec5  \cb3 \strokec9 max_indicators\cb3 \strokec5 :\
+                \cb3 \strokec9 profile_permutations\cb3 \strokec5 .\cb3 \strokec8 add\cb3 \strokec5 (\cb3 \strokec13 ", "\cb3 \strokec5 .\cb3 \strokec8 join\cb3 \strokec5 (\cb3 \strokec8 sorted\cb3 \strokec5 (\cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 perm\cb3 \strokec5 ))))\
+    \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec9 profile_permutations\cb3 \strokec5 \
+\
+\
+\cb3 \strokec11 class\cb3 \strokec5  \cb3 \strokec7 AwesomeStrategy\cb3 \strokec5 (\cb3 \strokec7 IStrategy\cb3 \strokec5 ):\
+    \cb3 \strokec9 INTERFACE_VERSION\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec10 3\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Optimal timeframe for the strategy.\cb3 \strokec5 \
+    \cb3 \strokec9 timeframe\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec13 '1h'\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Can this strategy go short?\cb3 \strokec5 \
+    \cb3 \strokec9 can_short\cb3 \strokec5 : \cb3 \strokec7 bool\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec11 False\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Run "populate_indicators()" only for new candle.\cb3 \strokec5 \
+    \cb3 \strokec9 process_only_new_candles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec11 True\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # These values can be overridden in the config.\cb3 \strokec5 \
+    \cb3 \strokec9 use_exit_signal\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec11 True\cb3 \strokec5 \
+    \cb3 \strokec9 exit_profit_only\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec11 False\cb3 \strokec5 \
+    \cb3 \strokec9 ignore_roi_if_entry_signal\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec11 False\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Number of candles the strategy requires before producing valid signals\cb3 \strokec5 \
+    \cb3 \strokec9 startup_candle_count\cb3 \strokec5 : \cb3 \strokec7 int\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec10 30\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Optional order type mapping.\cb3 \strokec5 \
+    \cb3 \strokec9 order_types\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 'entry'\cb3 \strokec5 : \cb3 \strokec13 'limit'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'exit'\cb3 \strokec5 : \cb3 \strokec13 'limit'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'stoploss'\cb3 \strokec5 : \cb3 \strokec13 'market'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'stoploss_on_exchange'\cb3 \strokec5 : \cb3 \strokec11 False\cb3 \strokec5 \
+    \}\
+\
+    \cb3 \strokec4 # Optional order time in force.\cb3 \strokec5 \
+    \cb3 \strokec9 order_time_in_force\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 'entry'\cb3 \strokec5 : \cb3 \strokec13 'GTC'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'exit'\cb3 \strokec5 : \cb3 \strokec13 'GTC'\cb3 \strokec5 \
+    \}\
+\
+    \cb3 \strokec8 @\cb3 \strokec7 property\cb3 \strokec5 \
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec9 plot_config\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 ):\
+        \cb3 \strokec6 return\cb3 \strokec5  \{\
+            \cb3 \strokec4 # Main plot indicators (Moving averages, ...)\cb3 \strokec5 \
+            \cb3 \strokec13 'main_plot'\cb3 \strokec5 : \{\
+                \cb3 \strokec13 'tema'\cb3 \strokec5 : \{\},\
+                \cb3 \strokec13 'sar'\cb3 \strokec5 : \{\cb3 \strokec13 'color'\cb3 \strokec5 : \cb3 \strokec13 'white'\cb3 \strokec5 \},\
+            \},\
+            \cb3 \strokec13 'subplots'\cb3 \strokec5 : \{\
+                \cb3 \strokec4 # Subplots - each dict defines one additional plot\cb3 \strokec5 \
+                \cb3 \strokec13 "MACD"\cb3 \strokec5 : \{\
+                    \cb3 \strokec13 'macd'\cb3 \strokec5 : \{\cb3 \strokec13 'color'\cb3 \strokec5 : \cb3 \strokec13 'blue'\cb3 \strokec5 \},\
+                    \cb3 \strokec13 'macdsignal'\cb3 \strokec5 : \{\cb3 \strokec13 'color'\cb3 \strokec5 : \cb3 \strokec13 'orange'\cb3 \strokec5 \},\
+                \},\
+                \cb3 \strokec13 "RSI"\cb3 \strokec5 : \{\
+                    \cb3 \strokec13 'rsi'\cb3 \strokec5 : \{\cb3 \strokec13 'color'\cb3 \strokec5 : \cb3 \strokec13 'red'\cb3 \strokec5 \},\
+                \}\
+            \}\
+        \}\
+\
+    \cb3 \strokec4 # Strategy parameters\cb3 \strokec5 \
+    \cb3 \strokec4 # Trend-Following Indicators\cb3 \strokec5 \
+    \cb3 \strokec9 trend_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  [\
+        \cb3 \strokec13 "EMA"\cb3 \strokec5 ,\
+        \cb3 \strokec4 # "ICHIMOKU",\cb3 \strokec5 \
+        \cb3 \strokec13 "SAR"\cb3 \strokec5 ,\
+        \cb3 \strokec13 "MAB"\cb3 \strokec5 ,\
+        \cb3 \strokec13 "ADX"\cb3 \strokec5 \
+    ]\
+\
+    \cb3 \strokec9 buy_trend_indicator_permutations\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\
+        \cb3 \strokec9 trend_profiles\cb3 \strokec5 , \cb3 \strokec9 include_none\cb3 \strokec12 =\cb3 \strokec11 False\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_trend_indicator_permutations\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\cb3 \strokec9 trend_profiles\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_trend_indicator\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 buy_trend_indicator_permutations\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 buy_trend_indicator_permutations\cb3 \strokec5 )), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec4 # sell_trend_indicator                = CategoricalParameter(sell_trend_indicator_permutations, default=random.choice(list(sell_trend_indicator_permutations)), space="sell", optimize=True)\cb3 \strokec5 \
+\
+    \cb3 \strokec9 ema_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 "quick_trend"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "short_term"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 20\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "intraday"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 15\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 30\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "medium_term"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 20\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 50\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "reversal_continuation"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 9\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 21\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "ultra_fast"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 3\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 8\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "longer_term"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 50\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 200\cb3 \strokec5 \
+        \}\
+    \}\
+\
+    \cb3 \strokec9 ema_periods_slow\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 set\cb3 \strokec5 ([\cb3 \strokec9 ma_profile_setting\cb3 \strokec5 [\cb3 \strokec13 "slow"\cb3 \strokec5 ]\
+                           \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 ma_profile_setting\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 ema_profiles\cb3 \strokec5 .\cb3 \strokec8 values\cb3 \strokec5 ()])\
+    \cb3 \strokec9 ema_periods_fast\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 set\cb3 \strokec5 ([\cb3 \strokec9 ma_profile_setting\cb3 \strokec5 [\cb3 \strokec13 "fast"\cb3 \strokec5 ]\
+                           \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 ma_profile_setting\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 ema_profiles\cb3 \strokec5 .\cb3 \strokec8 values\cb3 \strokec5 ()])\
+    \cb3 \strokec9 ma_periods\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 ema_periods_slow\cb3 \strokec5 .\cb3 \strokec8 union\cb3 \strokec5 (\cb3 \strokec9 ema_periods_fast\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Exponential Moving Average (EMA)\cb3 \strokec5 \
+    \cb3 \strokec9 ema_profile_names\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 ema_profiles\cb3 \strokec5 .\cb3 \strokec8 keys\cb3 \strokec5 ())\
+    \cb3 \strokec9 buy_ema\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 ema_profile_names\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 ema_profile_names\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec4 # sell_ema            = CategoricalParameter(ema_profile_names, default=random.choice(ema_profile_names), space="sell", optimize=True)\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Moving Average Bounce\cb3 \strokec5 \
+    \cb3 \strokec9 ma_bounce_periods\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  [\cb3 \strokec11 f\cb3 \strokec13 "ema\cb3 \strokec11 \{\cb3 \strokec9 period\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5  \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 period\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 ma_periods\cb3 \strokec5 ]\
+    \cb3 \strokec9 buy_mab\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 ma_bounce_periods\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 ma_bounce_periods\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec4 # sell_mab            = CategoricalParameter(ma_bounce_periods, default=random.choice(ma_bounce_periods), space="sell", optimize=True)\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Average Directional Index (ADX)\cb3 \strokec5 \
+    \cb3 \strokec9 buy_adx_strength\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 20\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 50\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 30\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec4 # sell_adx_strength           = IntParameter(low=20, high=50, default=30, space="sell", optimize=True)\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Momentum Indicators\cb3 \strokec5 \
+    \cb3 \strokec4 # Bullish MACD Included by Default on Buy\cb3 \strokec5 \
+    \cb3 \strokec9 additional_momentum_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  [\
+        \cb3 \strokec13 "RSI"\cb3 \strokec5 ,\
+        \cb3 \strokec13 "MACD"\cb3 \strokec5 ,\
+        \cb3 \strokec13 "STOCH"\cb3 \strokec5 ,\
+        \cb3 \strokec13 "CCI"\cb3 \strokec5 \
+    ]\
+\
+    \cb3 \strokec9 buy_momentum_indicator_permutations\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\
+        \cb3 \strokec9 additional_momentum_profiles\cb3 \strokec5 , \cb3 \strokec9 include_none\cb3 \strokec12 =\cb3 \strokec11 False\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_momentum_indicator_permutations\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\
+        \cb3 \strokec9 additional_momentum_profiles\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_momentum_indicator\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 buy_momentum_indicator_permutations\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 buy_momentum_indicator_permutations\cb3 \strokec5 )), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_momentum_indicator\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 sell_momentum_indicator_permutations\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 sell_momentum_indicator_permutations\cb3 \strokec5 )), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Relative Strength Index (RSI)\cb3 \strokec5 \
+    \cb3 \strokec9 rsi_periods\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec7 range\cb3 \strokec5 (\cb3 \strokec10 8\cb3 \strokec5 , \cb3 \strokec10 15\cb3 \strokec5 ))\
+    \cb3 \strokec9 buy_rsi_period\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\cb3 \strokec8 min\cb3 \strokec5 (\cb3 \strokec9 rsi_periods\cb3 \strokec5 ), \cb3 \strokec8 max\cb3 \strokec5 (\
+        \cb3 \strokec9 rsi_periods\cb3 \strokec5 ), \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 12\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_rsi_period\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\cb3 \strokec8 min\cb3 \strokec5 (\cb3 \strokec9 rsi_periods\cb3 \strokec5 ), \cb3 \strokec8 max\cb3 \strokec5 (\
+        \cb3 \strokec9 rsi_periods\cb3 \strokec5 ), \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 12\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_rsi_oversold\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 10\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 50\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 30\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_rsi_overbought\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 50\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 90\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 70\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_rsi_cross\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        [\cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_rsi_cross\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        [\cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Moving Average Convergence Divergence (MACD)\cb3 \strokec5 \
+    \cb3 \strokec9 macd_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 "balanced_default"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 12\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 26\cb3 \strokec5 ,\
+            \cb3 \strokec13 "signal"\cb3 \strokec5 : \cb3 \strokec10 9\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "quick_intraday"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 13\cb3 \strokec5 ,\
+            \cb3 \strokec13 "signal"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "short_term_trend"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 8\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 21\cb3 \strokec5 ,\
+            \cb3 \strokec13 "signal"\cb3 \strokec5 : \cb3 \strokec10 8\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "ultra_short_term"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 3\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "signal"\cb3 \strokec5 : \cb3 \strokec10 3\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "volatile_markets"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "fast"\cb3 \strokec5 : \cb3 \strokec10 9\cb3 \strokec5 ,\
+            \cb3 \strokec13 "slow"\cb3 \strokec5 : \cb3 \strokec10 18\cb3 \strokec5 ,\
+            \cb3 \strokec13 "signal"\cb3 \strokec5 : \cb3 \strokec10 9\cb3 \strokec5 \
+        \},\
+    \}\
+\
+    \cb3 \strokec9 macd_profile_names\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 macd_profiles\cb3 \strokec5 .\cb3 \strokec8 keys\cb3 \strokec5 ())\
+    \cb3 \strokec9 buy_macd_profile\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 macd_profile_names\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 macd_profile_names\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_macd_profile\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 macd_profile_names\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 macd_profile_names\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Stochastic Oscillator\cb3 \strokec5 \
+    \cb3 \strokec9 buy_stochastic_oversold\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 10\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 30\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 20\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_stochastic_overbought\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 70\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 90\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 80\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Commodity Channel Index (CCI)\cb3 \strokec5 \
+    \cb3 \strokec9 buy_cci_oversold\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =-\cb3 \strokec10 200\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =-\cb3 \strokec10 100\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =-\cb3 \strokec10 150\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_cci_overbought\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 100\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 200\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 150\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Volatility Indicators\cb3 \strokec5 \
+    \cb3 \strokec9 volatility_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  [\
+        \cb3 \strokec13 "BOLLINGER"\cb3 \strokec5 ,\
+        \cb3 \strokec13 "CHAIKIN"\cb3 \strokec5 ,\
+        \cb3 \strokec13 "KELTNER"\cb3 \strokec5 \
+    ]\
+\
+    \cb3 \strokec9 buy_volatility_indicator_permutations\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\
+        \cb3 \strokec9 volatility_profiles\cb3 \strokec5 , \cb3 \strokec9 include_none\cb3 \strokec12 =\cb3 \strokec11 False\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_volatility_indicator_permutations\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\
+        \cb3 \strokec9 volatility_profiles\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_volatility_indicator\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 buy_volatility_indicator_permutations\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 buy_volatility_indicator_permutations\cb3 \strokec5 )), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_volatility_indicator\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec8 indicator_permutations\cb3 \strokec5 (\cb3 \strokec9 volatility_profiles\cb3 \strokec5 ), \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 sell_volatility_indicator_permutations\cb3 \strokec5 )), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Bollinger Bands\cb3 \strokec5 \
+    \cb3 \strokec9 bollinger_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 "standard_default"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 21\cb3 \strokec5 ,\
+            \cb3 \strokec13 "stds"\cb3 \strokec5 : \cb3 \strokec10 2\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "narrow_range_focus"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "stds"\cb3 \strokec5 : \cb3 \strokec10 1\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "volatility_expansion"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 30\cb3 \strokec5 ,\
+            \cb3 \strokec13 "stds"\cb3 \strokec5 : \cb3 \strokec10 2.5\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "trend_confirmation"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 50\cb3 \strokec5 ,\
+            \cb3 \strokec13 "stds"\cb3 \strokec5 : \cb3 \strokec10 2\cb3 \strokec5 \
+        \}\
+    \}\
+\
+    \cb3 \strokec9 bollinger_profile_names\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 bollinger_profiles\cb3 \strokec5 .\cb3 \strokec8 keys\cb3 \strokec5 ())\
+    \cb3 \strokec9 buy_bollinger_profile\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 bollinger_profile_names\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 bollinger_profile_names\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_bollinger_cross\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 ([\
+                                               \cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_bollinger_profile\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 bollinger_profile_names\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 bollinger_profile_names\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_bollinger_cross\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 ([\
+                                                \cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Chaikin Volatility Indicator\cb3 \strokec5 \
+    \cb3 \strokec9 chaikin_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 "standard_default"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 14\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.10\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.20\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "higher_atr"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 20\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.10\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.20\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "short_term"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 7\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.05\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.10\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "trend_confirmation"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 14\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 20\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.15\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.30\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "volatility_breakout"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.30\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.50\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "intraday_scalping"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 3\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.05\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.10\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "conservative"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 14\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 20\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.15\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.25\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "aggressive"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 7\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.25\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.35\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "market_opening"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 5\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.20\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.30\cb3 \strokec5 \
+            \}\
+        \},\
+        \cb3 \strokec13 "market_opening"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "atr_period"\cb3 \strokec5 : \cb3 \strokec10 14\cb3 \strokec5 ,\
+            \cb3 \strokec13 "sma_period"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "threshold"\cb3 \strokec5 : \{\
+                \cb3 \strokec13 "low"\cb3 \strokec5 : \cb3 \strokec10 0.15\cb3 \strokec5 ,\
+                \cb3 \strokec13 "high"\cb3 \strokec5 : \cb3 \strokec10 0.25\cb3 \strokec5 \
+            \}\
+        \},\
+    \}\
+\
+    \cb3 \strokec9 chaikin_profile_names\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 .\cb3 \strokec8 keys\cb3 \strokec5 ())\
+    \cb3 \strokec9 buy_chaikin_profile\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 chaikin_profile_names\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 chaikin_profile_names\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_chaikin_limit\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  DecimalParameter(\cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 [\cb3 \strokec9 buy_chaikin_profile\cb3 \strokec5 .value][\cb3 \strokec13 "threshold"\cb3 \strokec5 ][\cb3 \strokec13 "low"\cb3 \strokec5 ], \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 [\cb3 \strokec9 buy_chaikin_profile\cb3 \strokec5 .value]\
+                                         [\cb3 \strokec13 "threshold"\cb3 \strokec5 ][\cb3 \strokec13 "high"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 [\cb3 \strokec9 buy_chaikin_profile\cb3 \strokec5 .value][\cb3 \strokec13 "threshold"\cb3 \strokec5 ][\cb3 \strokec13 "high"\cb3 \strokec5 ], \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_chaikin_profile\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\cb3 \strokec9 chaikin_profile_names\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 (\
+        \cb3 \strokec9 chaikin_profile_names\cb3 \strokec5 ), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_chaikin_limit\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  DecimalParameter(\cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 [\cb3 \strokec9 sell_chaikin_profile\cb3 \strokec5 .value][\cb3 \strokec13 "threshold"\cb3 \strokec5 ][\cb3 \strokec13 "low"\cb3 \strokec5 ], \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 [\cb3 \strokec9 sell_chaikin_profile\cb3 \strokec5 .value]\
+                                          [\cb3 \strokec13 "threshold"\cb3 \strokec5 ][\cb3 \strokec13 "high"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 [\cb3 \strokec9 sell_chaikin_profile\cb3 \strokec5 .value][\cb3 \strokec13 "threshold"\cb3 \strokec5 ][\cb3 \strokec13 "high"\cb3 \strokec5 ], \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Keltner Channel\cb3 \strokec5 \
+    \cb3 \strokec9 keltner_profiles\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 "5m"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 10\cb3 \strokec5 ,\
+            \cb3 \strokec13 "atrs"\cb3 \strokec5 : \cb3 \strokec10 1.5\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "15m"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 14\cb3 \strokec5 ,\
+            \cb3 \strokec13 "atrs"\cb3 \strokec5 : \cb3 \strokec10 2\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "30m"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 14\cb3 \strokec5 ,\
+            \cb3 \strokec13 "atrs"\cb3 \strokec5 : \cb3 \strokec10 1.8\cb3 \strokec5 \
+        \},\
+        \cb3 \strokec13 "1h"\cb3 \strokec5 : \{\
+            \cb3 \strokec13 "window"\cb3 \strokec5 : \cb3 \strokec10 14\cb3 \strokec5 ,\
+            \cb3 \strokec13 "atrs"\cb3 \strokec5 : \cb3 \strokec10 1.5\cb3 \strokec5 \
+        \}\
+    \}\
+\
+    \cb3 \strokec9 buy_keltner_band_cross\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec13 "MIDDLE_ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "MIDDLE_BELOW"\cb3 \strokec5 , \cb3 \strokec13 "LOWER_ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "LOWER_BELOW"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 ([\
+        \cb3 \strokec13 "MIDDLE_ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "MIDDLE_BELOW"\cb3 \strokec5 , \cb3 \strokec13 "LOWER_ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "LOWER_BELOW"\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_keltner_band_cross\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 ([\
+                                                   \cb3 \strokec13 "ABOVE"\cb3 \strokec5 , \cb3 \strokec13 "BELOW"\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Volume Indicators\cb3 \strokec5 \
+    \cb3 \strokec4 # On-Balance Volume (OBV)\cb3 \strokec5 \
+    \cb3 \strokec9 obv_periods\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 list\cb3 \strokec5 (\cb3 \strokec7 range\cb3 \strokec5 (\cb3 \strokec10 7\cb3 \strokec5 , \cb3 \strokec10 51\cb3 \strokec5 ))\
+    \cb3 \strokec9 buy_obv_window\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\cb3 \strokec8 min\cb3 \strokec5 (\cb3 \strokec9 obv_periods\cb3 \strokec5 ), \cb3 \strokec8 max\cb3 \strokec5 (\
+        \cb3 \strokec9 obv_periods\cb3 \strokec5 ), \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 20\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_obv_window\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\cb3 \strokec8 min\cb3 \strokec5 (\cb3 \strokec9 obv_periods\cb3 \strokec5 ), \cb3 \strokec8 max\cb3 \strokec5 (\
+        \cb3 \strokec9 obv_periods\cb3 \strokec5 ), \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 20\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 buy_enable_obv\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec11 True\cb3 \strokec5 , \cb3 \strokec11 False\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 ([\
+                                          \cb3 \strokec11 True\cb3 \strokec5 , \cb3 \strokec11 False\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 sell_enable_obv\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter([\cb3 \strokec11 True\cb3 \strokec5 , \cb3 \strokec11 False\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec7 random\cb3 \strokec5 .\cb3 \strokec9 choice\cb3 \strokec5 ([\
+                                           \cb3 \strokec11 True\cb3 \strokec5 , \cb3 \strokec11 False\cb3 \strokec5 ]), \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "sell"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Position sizing parameters\cb3 \strokec5 \
+    \cb3 \strokec9 risk_per_trade\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  DecimalParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 0.02\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 0.10\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 0.05\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 'buy'\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Confirmation signal parameters\cb3 \strokec5 \
+    \cb3 \strokec9 macd_histogram_threshold\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  DecimalParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 0\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 0.2\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 0.05\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 'buy'\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Number of candles the strategy requires before producing valid signals\cb3 \strokec5 \
+    \cb3 \strokec9 startup_candle_count\cb3 \strokec5 : \cb3 \strokec7 int\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec10 30\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Optional order type mapping.\cb3 \strokec5 \
+    \cb3 \strokec9 order_types\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 'entry'\cb3 \strokec5 : \cb3 \strokec13 'limit'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'exit'\cb3 \strokec5 : \cb3 \strokec13 'limit'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'stoploss'\cb3 \strokec5 : \cb3 \strokec13 'market'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'stoploss_on_exchange'\cb3 \strokec5 : \cb3 \strokec11 False\cb3 \strokec5 \
+    \}\
+\
+    \cb3 \strokec4 # Optional order time in force.\cb3 \strokec5 \
+    \cb3 \strokec9 order_time_in_force\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \{\
+        \cb3 \strokec13 'entry'\cb3 \strokec5 : \cb3 \strokec13 'GTC'\cb3 \strokec5 ,\
+        \cb3 \strokec13 'exit'\cb3 \strokec5 : \cb3 \strokec13 'GTC'\cb3 \strokec5 \
+    \}\
+\
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec8 informative_pairs\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 ):\
+        \cb3 \strokec13 """\cb3 \strokec5 \
+\cb3 \strokec13         Define additional, informative pair/interval combinations to be cached from the exchange.\cb3 \strokec5 \
+\cb3 \strokec13         These pair/interval combinations are non-tradeable, unless they are part\cb3 \strokec5 \
+\cb3 \strokec13         of the whitelist as well.\cb3 \strokec5 \
+\cb3 \strokec13         For more information, please consult the documentation\cb3 \strokec5 \
+\cb3 \strokec13         :return: List of tuples in the format (pair, interval)\cb3 \strokec5 \
+\cb3 \strokec13             Sample: return [("ETH/USDT", "5m"),\cb3 \strokec5 \
+\cb3 \strokec13                             ("BTC/USDT", "15m"),\cb3 \strokec5 \
+\cb3 \strokec13                             ]\cb3 \strokec5 \
+\cb3 \strokec13         """\cb3 \strokec5 \
+        \cb3 \strokec6 return\cb3 \strokec5  []\
+\
+    \cb3 \strokec4 # Define the parameter spaces\cb3 \strokec5 \
+    \cb3 \strokec9 max_epa\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  CategoricalParameter(\
+        [\cb3 \strokec12 -\cb3 \strokec10 1\cb3 \strokec5 , \cb3 \strokec10 0\cb3 \strokec5 , \cb3 \strokec10 1\cb3 \strokec5 , \cb3 \strokec10 3\cb3 \strokec5 , \cb3 \strokec10 5\cb3 \strokec5 , \cb3 \strokec10 10\cb3 \strokec5 ], \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 3\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "buy"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec8 @\cb3 \strokec7 property\cb3 \strokec5 \
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec9 max_entry_position_adjustment\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 ):\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 max_epa\cb3 \strokec5 .value\
+\
+    \cb3 \strokec4 # Define the parameter spaces\cb3 \strokec5 \
+    \cb3 \strokec9 cooldown_lookback\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 2\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 48\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 5\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "protection"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 stop_duration\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  IntParameter(\
+        \cb3 \strokec9 low\cb3 \strokec12 =\cb3 \strokec10 12\cb3 \strokec5 , \cb3 \strokec9 high\cb3 \strokec12 =\cb3 \strokec10 200\cb3 \strokec5 , \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec10 5\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "protection"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 use_stop_protection\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  BooleanParameter(\
+        \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "protection"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 use_drawdown_protection\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  BooleanParameter(\
+        \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "protection"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+    \cb3 \strokec9 use_low_profit_protection\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  BooleanParameter(\
+        \cb3 \strokec9 default\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 , \cb3 \strokec9 space\cb3 \strokec12 =\cb3 \strokec13 "protection"\cb3 \strokec5 , \cb3 \strokec9 optimize\cb3 \strokec12 =\cb3 \strokec11 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec8 @\cb3 \strokec7 property\cb3 \strokec5 \
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec9 protections\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 ):\
+        \cb3 \strokec9 prot\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  []\
+\
+        \cb3 \strokec9 prot\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\{\
+            \cb3 \strokec13 "method"\cb3 \strokec5 : \cb3 \strokec13 "CooldownPeriod"\cb3 \strokec5 ,\
+            \cb3 \strokec13 "stop_duration_candles"\cb3 \strokec5 : \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 cooldown_lookback\cb3 \strokec5 .value\
+        \})\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 use_stop_protection\cb3 \strokec5 .value:\
+            \cb3 \strokec9 prot\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\{\
+                \cb3 \strokec13 "method"\cb3 \strokec5 : \cb3 \strokec13 "StoplossGuard"\cb3 \strokec5 ,\
+                \cb3 \strokec13 "lookback_period_candles"\cb3 \strokec5 : \cb3 \strokec10 24\cb3 \strokec5  \cb3 \strokec12 *\cb3 \strokec5  \cb3 \strokec10 3\cb3 \strokec5 ,\
+                \cb3 \strokec13 "trade_limit"\cb3 \strokec5 : \cb3 \strokec10 4\cb3 \strokec5 ,\
+                \cb3 \strokec13 "stop_duration_candles"\cb3 \strokec5 : \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 stop_duration\cb3 \strokec5 .value,\
+                \cb3 \strokec13 "only_per_pair"\cb3 \strokec5 : \cb3 \strokec11 False\cb3 \strokec5 \
+            \})\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 use_drawdown_protection\cb3 \strokec5 .value:\
+            \cb3 \strokec9 prot\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\{\
+                \cb3 \strokec13 "method"\cb3 \strokec5 : \cb3 \strokec13 "MaxDrawdown"\cb3 \strokec5 ,\
+                \cb3 \strokec13 "lookback_period_candles"\cb3 \strokec5 : \cb3 \strokec10 48\cb3 \strokec5 ,\
+                \cb3 \strokec13 "trade_limit"\cb3 \strokec5 : \cb3 \strokec10 20\cb3 \strokec5 ,\
+                \cb3 \strokec13 "stop_duration_candles"\cb3 \strokec5 : \cb3 \strokec10 12\cb3 \strokec5 ,\
+                \cb3 \strokec13 "max_allowed_drawdown"\cb3 \strokec5 : \cb3 \strokec10 0.15\cb3 \strokec5 \
+            \})\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 use_low_profit_protection\cb3 \strokec5 .value:\
+            \cb3 \strokec9 prot\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\{\
+                \cb3 \strokec13 "method"\cb3 \strokec5 : \cb3 \strokec13 "LowProfitPairs"\cb3 \strokec5 ,\
+                \cb3 \strokec13 "lookback_period_candles"\cb3 \strokec5 : \cb3 \strokec10 6\cb3 \strokec5 ,\
+                \cb3 \strokec13 "trade_limit"\cb3 \strokec5 : \cb3 \strokec10 2\cb3 \strokec5 ,\
+                \cb3 \strokec13 "stop_duration"\cb3 \strokec5 : \cb3 \strokec10 60\cb3 \strokec5 ,\
+                \cb3 \strokec13 "required_profit"\cb3 \strokec5 : \cb3 \strokec10 0.02\cb3 \strokec5 ,\
+                \cb3 \strokec13 "only_per_pair"\cb3 \strokec5 : \cb3 \strokec11 False\cb3 \strokec5 ,\
+            \})\
+\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec9 prot\cb3 \strokec5 \
+\
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec8 position_size\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 , \cb3 \strokec12 **\cb3 \strokec9 kwargs\cb3 \strokec5 ):\
+        \cb3 \strokec13 """\cb3 \strokec5 \
+\cb3 \strokec13         Returns the maximum position size for the current pair and price.\cb3 \strokec5 \
+\cb3 \strokec13         """\cb3 \strokec5 \
+        \cb3 \strokec9 risk_factor\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 risk_per_trade\cb3 \strokec5 .value\
+        \cb3 \strokec9 portfolio_value\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .wallets[\cb3 \strokec9 self\cb3 \strokec5 .base_currency]\
+        \cb3 \strokec9 stop_loss_pct\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec8 abs\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 .stoploss)\
+        \cb3 \strokec9 entry_price\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 kwargs\cb3 \strokec5 .\cb3 \strokec8 get\cb3 \strokec5 (\cb3 \strokec13 'price'\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 entry_price\cb3 \strokec5 :\
+            \cb3 \strokec9 position_size\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec9 portfolio_value\cb3 \strokec5  \cb3 \strokec12 *\cb3 \strokec5  \cb3 \strokec9 risk_factor\cb3 \strokec5 ) \cb3 \strokec12 /\cb3 \strokec5  \\\
+                (\cb3 \strokec9 entry_price\cb3 \strokec5  \cb3 \strokec12 *\cb3 \strokec5  \cb3 \strokec9 stop_loss_pct\cb3 \strokec5 )\
+            \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec9 position_size\cb3 \strokec5 \
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec10 0\cb3 \strokec5 \
+\
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec8 populate_indicators\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 , \cb3 \strokec9 dataframe\cb3 \strokec5 : \cb3 \strokec7 DataFrame\cb3 \strokec5 , \cb3 \strokec9 metadata\cb3 \strokec5 : \cb3 \strokec7 dict\cb3 \strokec5 ) -> \cb3 \strokec7 DataFrame\cb3 \strokec5 :\
+\
+        \cb3 \strokec4 # Trend-Following Indicators\cb3 \strokec5 \
+        \cb3 \strokec4 # Exponential Moving Average (EMA)\cb3 \strokec5 \
+        \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 ma_period\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 ma_periods\cb3 \strokec5 :\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'ema\cb3 \strokec11 \{\cb3 \strokec9 ma_period\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .EMA(\
+                \cb3 \strokec9 dataframe\cb3 \strokec5 , \cb3 \strokec9 timeperiod\cb3 \strokec12 =\cb3 \strokec9 ma_period\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Parabolic SAR\cb3 \strokec5 \
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'sar'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .SAR(\cb3 \strokec9 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Ichimoku Cloud\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['tenkan_sen']     = ta.EMA(dataframe, timeperiod=9)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['kijun_sen']      = ta.EMA(dataframe, timeperiod=26)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['senkou_span_a']  = 0.5 * (dataframe['tenkan_sen'] + dataframe['kijun_sen'])\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['senkou_span_b']  = ta.EMA(dataframe, timeperiod=52)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Average Directional Index (ADX)\cb3 \strokec5 \
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'adx'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .ADX(\cb3 \strokec9 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Momentum Indicators\cb3 \strokec5 \
+        \cb3 \strokec4 # Relative Strength Index (RSI)\cb3 \strokec5 \
+        \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 rsi_period\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 rsi_periods\cb3 \strokec5 :\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'rsi\cb3 \strokec11 \{\cb3 \strokec9 rsi_period\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .RSI(\
+                \cb3 \strokec9 dataframe\cb3 \strokec5 , \cb3 \strokec9 timeperiod\cb3 \strokec12 =\cb3 \strokec9 rsi_period\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Moving Average Convergence Divergence (MACD)\cb3 \strokec5 \
+        \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 macd_profile_name\cb3 \strokec5 , \cb3 \strokec9 macd_profile_settings\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 macd_profiles\cb3 \strokec5 .\cb3 \strokec8 items\cb3 \strokec5 ():\
+            \cb3 \strokec9 macd\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .MACD(\cb3 \strokec9 dataframe\cb3 \strokec5 , \cb3 \strokec9 fastperiod\cb3 \strokec12 =\cb3 \strokec9 macd_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "fast"\cb3 \strokec5 ],\
+                           \cb3 \strokec9 slowperiod\cb3 \strokec12 =\cb3 \strokec9 macd_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "slow"\cb3 \strokec5 ], \cb3 \strokec9 signalperiod\cb3 \strokec12 =\cb3 \strokec9 macd_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "signal"\cb3 \strokec5 ])\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'macd_\cb3 \strokec11 \{\cb3 \strokec9 macd_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 macd\cb3 \strokec5 [\cb3 \strokec13 "macd"\cb3 \strokec5 ]\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'macdsignal_\cb3 \strokec11 \{\cb3 \strokec9 macd_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 macd\cb3 \strokec5 [\cb3 \strokec13 "macdsignal"\cb3 \strokec5 ]\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'macd_histogram_\cb3 \strokec11 \{\cb3 \strokec9 macd_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 macd\cb3 \strokec5 [\cb3 \strokec13 "macdhist"\cb3 \strokec5 ]\
+\
+        \cb3 \strokec4 # Stochastic Oscillator\cb3 \strokec5 \
+        \cb3 \strokec9 stoch_fast\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .STOCHF(\cb3 \strokec9 dataframe\cb3 \strokec5 )\
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'fastd'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 stoch_fast\cb3 \strokec5 [\cb3 \strokec13 'fastd'\cb3 \strokec5 ]\
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'fastk'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 stoch_fast\cb3 \strokec5 [\cb3 \strokec13 'fastk'\cb3 \strokec5 ]\
+\
+        \cb3 \strokec4 # Commodity Channel Index (CCI)\cb3 \strokec5 \
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'cci'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .CCI(\cb3 \strokec9 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Volatility Indicators\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Bollinger Bands\cb3 \strokec5 \
+        \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 bollinger_profile_name\cb3 \strokec5 , \cb3 \strokec9 bollinger_profile_settings\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 bollinger_profiles\cb3 \strokec5 .\cb3 \strokec8 items\cb3 \strokec5 ():\
+            \cb3 \strokec9 bollinger_bands\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 qtpylib\cb3 \strokec5 .bollinger_bands(\cb3 \strokec7 qtpylib\cb3 \strokec5 .typical_price(\
+                \cb3 \strokec9 dataframe\cb3 \strokec5 ), \cb3 \strokec9 window\cb3 \strokec12 =\cb3 \strokec9 bollinger_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "window"\cb3 \strokec5 ], \cb3 \strokec9 stds\cb3 \strokec12 =\cb3 \strokec9 bollinger_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "stds"\cb3 \strokec5 ])\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'bb_upperband_\cb3 \strokec11 \{\cb3 \strokec9 bollinger_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 bollinger_bands\cb3 \strokec5 [\cb3 \strokec13 'upper'\cb3 \strokec5 ]\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'bb_middleband_\cb3 \strokec11 \{\cb3 \strokec9 bollinger_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 bollinger_bands\cb3 \strokec5 [\cb3 \strokec13 'mid'\cb3 \strokec5 ]\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'bb_lowerband_\cb3 \strokec11 \{\cb3 \strokec9 bollinger_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 bollinger_bands\cb3 \strokec5 [\cb3 \strokec13 'lower'\cb3 \strokec5 ]\
+\
+        \cb3 \strokec4 # Chaikin Volatility Indicator\cb3 \strokec5 \
+        \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 chaikin_profile_name\cb3 \strokec5 , \cb3 \strokec9 chaikin_profile_settings\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 chaikin_profiles\cb3 \strokec5 .\cb3 \strokec8 items\cb3 \strokec5 ():\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'chaikin_\cb3 \strokec11 \{\cb3 \strokec9 chaikin_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .ATR(\
+                \cb3 \strokec9 dataframe\cb3 \strokec5 , \cb3 \strokec9 timeperiod\cb3 \strokec12 =\cb3 \strokec9 chaikin_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "atr_period"\cb3 \strokec5 ]) \cb3 \strokec12 /\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .SMA(\cb3 \strokec9 dataframe\cb3 \strokec5 , \cb3 \strokec9 timeperiod\cb3 \strokec12 =\cb3 \strokec9 chaikin_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "sma_period"\cb3 \strokec5 ])\
+\
+        \cb3 \strokec4 # Keltner Channel\cb3 \strokec5 \
+        \cb3 \strokec6 for\cb3 \strokec5  \cb3 \strokec9 keltner_profile_name\cb3 \strokec5 , \cb3 \strokec9 keltner_profile_settings\cb3 \strokec5  \cb3 \strokec6 in\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 keltner_profiles\cb3 \strokec5 .\cb3 \strokec8 items\cb3 \strokec5 ():\
+            \cb3 \strokec9 keltner\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 qtpylib\cb3 \strokec5 .keltner_channel(\
+                \cb3 \strokec9 dataframe\cb3 \strokec5 , \cb3 \strokec9 window\cb3 \strokec12 =\cb3 \strokec9 keltner_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "window"\cb3 \strokec5 ], \cb3 \strokec9 atrs\cb3 \strokec12 =\cb3 \strokec9 keltner_profile_settings\cb3 \strokec5 [\cb3 \strokec13 "atrs"\cb3 \strokec5 ])\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'upperband_\cb3 \strokec11 \{\cb3 \strokec9 keltner_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 keltner\cb3 \strokec5 [\cb3 \strokec13 'upper'\cb3 \strokec5 ]\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'middleband_\cb3 \strokec11 \{\cb3 \strokec9 keltner_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 keltner\cb3 \strokec5 [\cb3 \strokec13 'mid'\cb3 \strokec5 ]\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'lowerband_\cb3 \strokec11 \{\cb3 \strokec9 keltner_profile_name\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 keltner\cb3 \strokec5 [\cb3 \strokec13 'lower'\cb3 \strokec5 ]\
+\
+        \cb3 \strokec4 # On-Balance Volume (OBV)\cb3 \strokec5 \
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'obv'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .OBV(\cb3 \strokec9 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 \
+\
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec8 populate_entry_trend\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 , \cb3 \strokec9 dataframe\cb3 \strokec5 : \cb3 \strokec7 DataFrame\cb3 \strokec5 , \cb3 \strokec9 metadata\cb3 \strokec5 : \cb3 \strokec7 dict\cb3 \strokec5 ) -> \cb3 \strokec7 DataFrame\cb3 \strokec5 :\
+        \cb3 \strokec4 # Define the buy conditions\cb3 \strokec5 \
+        \cb3 \strokec9 conditions\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  []\
+\
+        \cb3 \strokec4 ### Trend-Following Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # EMA\cb3 \strokec5 \
+        \cb3 \strokec14 EMA\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "ema\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 ema_profiles\cb3 \strokec5 [\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_ema\cb3 \strokec5 .value][\cb3 \strokec13 'fast'\cb3 \strokec5 ]\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ],\
+               \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "ema\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 ema_profiles\cb3 \strokec5 [\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_ema\cb3 \strokec5 .value][\cb3 \strokec13 'slow'\cb3 \strokec5 ]\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ]))\
+        \cb3 \strokec4 # Parabolic SAR\cb3 \strokec5 \
+        \cb3 \strokec14 SAR\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ] \cb3 \strokec8 >=\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'sar'\cb3 \strokec5 ])\
+        \cb3 \strokec4 # Moving Average Bounce\cb3 \strokec5 \
+        \cb3 \strokec14 MAB\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ].\cb3 \strokec8 shift\cb3 \strokec5 (\cb3 \strokec10 1\cb3 \strokec5 ) \cb3 \strokec8 <=\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_mab\cb3 \strokec5 .value].shift(\
+            \cb3 \strokec10 1\cb3 \strokec5 )) \cb3 \strokec12 &\cb3 \strokec5  (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_mab\cb3 \strokec5 .value])\
+        \cb3 \strokec4 # ADX\cb3 \strokec5 \
+        \cb3 \strokec14 ADX\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'adx'\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_adx_strength\cb3 \strokec5 .value)\
+        \cb3 \strokec4 # Ichimoku Cloud\cb3 \strokec5 \
+        \cb3 \strokec4 # ICHIMOKU = (dataframe['tenkan_sen'] > dataframe['kijun_sen']) & (dataframe['tenkan_sen'].shift(1) <= dataframe['kijun_sen'].shift(1))\cb3 \strokec5 \
+\
+        \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_trend_indicator\cb3 \strokec5 .value\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "EMA"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 EMA\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "SAR"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 SAR\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "MAB"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 MAB\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "ADX"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 ADX\cb3 \strokec5 )\
+        \cb3 \strokec4 # if "ICHIMOKU" in additional_selected_indicators:\cb3 \strokec5 \
+        \cb3 \strokec4 #     conditions.append(ICHIMOKU)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 ### Momentum Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # MACD\cb3 \strokec5 \
+        \cb3 \strokec14 BULLISH_MACD\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "macd_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_macd_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "macdsignal_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_macd_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ])) \cb3 \strokec8 |\cb3 \strokec5  (\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "macd_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_macd_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec10 0\cb3 \strokec5 )\
+        \cb3 \strokec4 # RSI\cb3 \strokec5 \
+        \cb3 \strokec14 RSI_CROSS_ABOVE\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'rsi\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_rsi_period\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_rsi_oversold\cb3 \strokec5 .value))\
+        \cb3 \strokec14 RSI_CROSS_BELOW\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'rsi\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_rsi_period\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_rsi_oversold\cb3 \strokec5 .value))\
+        \cb3 \strokec4 # Stochastic Oscillator\cb3 \strokec5 \
+        \cb3 \strokec4 # & (dataframe['fastk'].shift(1) >= self.buy_stochastic_oversold.value)\cb3 \strokec5 \
+        \cb3 \strokec14 STOCH\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'fastk'\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_stochastic_oversold\cb3 \strokec5 .value))\
+        \cb3 \strokec4 # CCI\cb3 \strokec5 \
+        \cb3 \strokec14 CCI\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'cci'\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_cci_oversold\cb3 \strokec5 .value))\
+\
+        \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 BULLISH_MACD\cb3 \strokec5 )\
+        \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_momentum_indicator\cb3 \strokec5 .value\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "RSI"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_rsi_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "ABOVE"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 RSI_CROSS_ABOVE\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_rsi_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "BELOW"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 RSI_CROSS_BELOW\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "STOCH"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 STOCH\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "CCI"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 CCI\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 ### Volatility Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # Bollinger Bands\cb3 \strokec5 \
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'bb_lowerband'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'bb_lowerband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_bollinger_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]\
+        \cb3 \strokec14 BOLLINGER_CROSS_ABOVE\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'bb_lowerband'\cb3 \strokec5 ]))\
+        \cb3 \strokec14 BOLLINGER_CROSS_BELOW\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_below(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'bb_lowerband'\cb3 \strokec5 ]))\
+\
+        \cb3 \strokec4 # Chaikin\cb3 \strokec5 \
+        \cb3 \strokec14 CHAIKIN\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'chaikin_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_chaikin_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_chaikin_limit\cb3 \strokec5 .value)\
+\
+        \cb3 \strokec4 # Keltner\cb3 \strokec5 \
+        \cb3 \strokec14 KELTNER_MIDDLEBAND_CROSS_ABOVE\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'middleband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 timeframe\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]))\
+        \cb3 \strokec14 KELTNER_MIDDLEBAND_CROSS_BELOW\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_below(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'middleband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 timeframe\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]))\
+        \cb3 \strokec14 KELTNER_LOWERBAND_CROSS_ABOVE\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'lowerband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 timeframe\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]))\
+        \cb3 \strokec14 KELTNER_LOWERBAND_CROSS_BELOW\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_below(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'lowerband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 timeframe\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]))\
+\
+        \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_volatility_indicator\cb3 \strokec5 .value\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "BOLLINGER"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_bollinger_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "ABOVE"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 BOLLINGER_CROSS_ABOVE\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_bollinger_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "BELOW"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 BOLLINGER_CROSS_BELOW\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "CHAIKIN"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 CHAIKIN\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "KELTNER"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_keltner_band_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "MIDDLE_ABOVE"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 KELTNER_MIDDLEBAND_CROSS_ABOVE\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_keltner_band_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "MIDDLE_BELOW"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 KELTNER_MIDDLEBAND_CROSS_BELOW\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_keltner_band_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "LOWER_ABOVE"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 KELTNER_LOWERBAND_CROSS_ABOVE\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_keltner_band_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "LOWER_BELOW"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 KELTNER_LOWERBAND_CROSS_BELOW\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 ### Volume Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # OBV\cb3 \strokec5 \
+        \cb3 \strokec4 # & (dataframe['close'] > dataframe['ema200'])\cb3 \strokec5 \
+        \cb3 \strokec14 OBV\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'obv'\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'obv'\cb3 \strokec5 ].\cb3 \strokec8 rolling\cb3 \strokec5 (\
+            \cb3 \strokec9 window\cb3 \strokec12 =\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_obv_window\cb3 \strokec5 .value).\cb3 \strokec8 mean\cb3 \strokec5 ())\
+        \cb3 \strokec4 # On-Balance Volume (OBV)\cb3 \strokec5 \
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_enable_obv\cb3 \strokec5 .value:\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 OBV\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Add confirmation signal: Check MACD histogram\cb3 \strokec5 \
+        \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'macd_histogram_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 buy_macd_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 macd_histogram_threshold\cb3 \strokec5 .value\
+        ))\
+\
+        \cb3 \strokec4 # Check that volume is not 0\cb3 \strokec5 \
+        \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'volume'\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec10 0\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 conditions\cb3 \strokec5 :\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 .\cb3 \strokec9 loc\cb3 \strokec5 [\
+                \cb3 \strokec8 reduce\cb3 \strokec5 (\cb3 \strokec11 lambda\cb3 \strokec5  \cb3 \strokec9 x\cb3 \strokec5 , \cb3 \strokec9 y\cb3 \strokec5 : \cb3 \strokec9 x\cb3 \strokec5  \cb3 \strokec12 &\cb3 \strokec5  \cb3 \strokec9 y\cb3 \strokec5 , \cb3 \strokec9 conditions\cb3 \strokec5 ),\
+                \cb3 \strokec13 'buy'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec10 1\cb3 \strokec5 \
+\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 \
+\
+    \cb3 \strokec11 def\cb3 \strokec5  \cb3 \strokec8 populate_exit_trend\cb3 \strokec5 (\cb3 \strokec9 self\cb3 \strokec5 , \cb3 \strokec9 dataframe\cb3 \strokec5 : \cb3 \strokec7 DataFrame\cb3 \strokec5 , \cb3 \strokec9 metadata\cb3 \strokec5 : \cb3 \strokec7 dict\cb3 \strokec5 ) -> \cb3 \strokec7 DataFrame\cb3 \strokec5 :\
+        \cb3 \strokec4 # Define the sell conditions\cb3 \strokec5 \
+        \cb3 \strokec9 conditions\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  []\
+\
+        \cb3 \strokec4 ### Trend-Following Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # EMA\cb3 \strokec5 \
+        \cb3 \strokec4 # EMA = (dataframe[f"ema\{self.ema_profiles[self.sell_ema.value]['fast']\}"] <  dataframe[f"ema\{self.ema_profiles[self.sell_ema.value]['slow']\}"])\cb3 \strokec5 \
+        \cb3 \strokec4 # Ichimoku Cloud\cb3 \strokec5 \
+        \cb3 \strokec4 # ICHIMOKU = (dataframe['close'] < dataframe['senkou_span_a']) & (dataframe['close'] < dataframe['senkou_span_b'])\cb3 \strokec5 \
+        \cb3 \strokec4 # Parabolic SAR\cb3 \strokec5 \
+        \cb3 \strokec4 # SAR = (dataframe['close'] < dataframe['sar'])\cb3 \strokec5 \
+        \cb3 \strokec4 # # Moving Average Bounce\cb3 \strokec5 \
+        \cb3 \strokec4 # MAB = (dataframe['close'] < dataframe[self.sell_mab.value]) & (dataframe['close'].shift(1) >= dataframe[self.sell_mab.value].shift(1))\cb3 \strokec5 \
+        \cb3 \strokec4 # ADX\cb3 \strokec5 \
+        \cb3 \strokec4 # ADX = (dataframe['adx'] > self.sell_adx_strength.value)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # additional_selected_indicators = self.sell_trend_indicator.value\cb3 \strokec5 \
+        \cb3 \strokec4 # if "EMA" in additional_selected_indicators:\cb3 \strokec5 \
+        \cb3 \strokec4 #     conditions.append(EMA)\cb3 \strokec5 \
+        \cb3 \strokec4 # if "ICHIMOKU" in additional_selected_indicators:\cb3 \strokec5 \
+        \cb3 \strokec4 #     conditions.append(ICHIMOKU)\cb3 \strokec5 \
+        \cb3 \strokec4 # if "SAR" in additional_selected_indicators:\cb3 \strokec5 \
+        \cb3 \strokec4 #     conditions.append(SAR)\cb3 \strokec5 \
+        \cb3 \strokec4 # if "MAB" in additional_selected_indicators:\cb3 \strokec5 \
+        \cb3 \strokec4 #     conditions.append(MAB)\cb3 \strokec5 \
+        \cb3 \strokec4 # if "ADX" in additional_selected_indicators:\cb3 \strokec5 \
+        \cb3 \strokec4 #     conditions.append(ADX)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 ### Momentum Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # MACD\cb3 \strokec5 \
+        \cb3 \strokec14 BULLISH_MACD\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "macd_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_macd_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "macdsignal_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_macd_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ])) \cb3 \strokec8 |\cb3 \strokec5  (\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 "macd_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_macd_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 "\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec10 0\cb3 \strokec5 )\
+        \cb3 \strokec4 # RSI\cb3 \strokec5 \
+        \cb3 \strokec14 RSI_CROSS_ABOVE\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'rsi\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_rsi_period\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_rsi_overbought\cb3 \strokec5 .value))\
+        \cb3 \strokec14 RSI_CROSS_BELOW\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_below(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'rsi\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_rsi_period\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_rsi_overbought\cb3 \strokec5 .value))\
+        \cb3 \strokec4 # Stochastic Oscillator\cb3 \strokec5 \
+        \cb3 \strokec14 STOCH\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'fastk'\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_stochastic_overbought\cb3 \strokec5 .value)) \cb3 \strokec12 &\cb3 \strokec5  (\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'fastk'\cb3 \strokec5 ].\cb3 \strokec8 shift\cb3 \strokec5 (\cb3 \strokec10 1\cb3 \strokec5 ) \cb3 \strokec8 <=\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_stochastic_overbought\cb3 \strokec5 .value)\
+        \cb3 \strokec4 # CCI\cb3 \strokec5 \
+        \cb3 \strokec14 CCI\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_below(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'cci'\cb3 \strokec5 ], \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_cci_overbought\cb3 \strokec5 .value))\
+\
+        \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_momentum_indicator\cb3 \strokec5 .value\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "MACD"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 BULLISH_MACD\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "RSI"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_rsi_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "ABOVE"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 RSI_CROSS_ABOVE\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_rsi_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "BELOW"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 RSI_CROSS_BELOW\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "STOCH"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 STOCH\cb3 \strokec5 )\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "CCI"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 CCI\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 ### Volatility Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # Bollinger Bands\cb3 \strokec5 \
+        \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'bb_upperband'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'bb_upperband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_bollinger_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]\
+        \cb3 \strokec14 BOLLINGER_CROSS_ABOVE\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'bb_upperband'\cb3 \strokec5 ]))\
+        \cb3 \strokec14 BOLLINGER_CROSS_BELOW\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_below(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'bb_upperband'\cb3 \strokec5 ]))\
+\
+        \cb3 \strokec4 # Chaikin\cb3 \strokec5 \
+        \cb3 \strokec14 CHAIKIN\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'chaikin_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_chaikin_profile\cb3 \strokec5 .value\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ] \cb3 \strokec8 <\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_chaikin_limit\cb3 \strokec5 .value)\
+\
+        \cb3 \strokec4 # Keltner\cb3 \strokec5 \
+        \cb3 \strokec14 KELTNER_CROSS_ABOVE\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'upperband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 timeframe\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]))\
+        \cb3 \strokec14 KELTNER_CROSS_BELOW\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_below(\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ], \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec11 f\cb3 \strokec13 'upperband_\cb3 \strokec11 \{\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 timeframe\cb3 \strokec11 \}\cb3 \strokec13 '\cb3 \strokec5 ]))\
+\
+        \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_volatility_indicator\cb3 \strokec5 .value\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "BOLLINGER"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_bollinger_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "ABOVE"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 BOLLINGER_CROSS_ABOVE\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_bollinger_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "BELOW"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 BOLLINGER_CROSS_BELOW\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "CHAIKIN"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 CHAIKIN\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec13 "KELTNER"\cb3 \strokec5  \cb3 \strokec11 in\cb3 \strokec5  \cb3 \strokec9 additional_selected_indicators\cb3 \strokec5 :\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_keltner_band_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "ABOVE"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 KELTNER_CROSS_ABOVE\cb3 \strokec5 )\
+            \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_keltner_band_cross\cb3 \strokec5 .value \cb3 \strokec12 ==\cb3 \strokec5  \cb3 \strokec13 "BELOW"\cb3 \strokec5 :\
+                \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 KELTNER_CROSS_BELOW\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 ### Volume Indicators ###\cb3 \strokec5 \
+        \cb3 \strokec4 # OBV\cb3 \strokec5 \
+        \cb3 \strokec14 OBV\cb3 \strokec5  \cb3 \strokec12 =\cb3 \strokec5  (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'obv'\cb3 \strokec5 ] \cb3 \strokec8 <\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'obv'\cb3 \strokec5 ].\cb3 \strokec8 rolling\cb3 \strokec5 (\
+            \cb3 \strokec9 window\cb3 \strokec12 =\cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_obv_window\cb3 \strokec5 .value).\cb3 \strokec8 mean\cb3 \strokec5 ()) \cb3 \strokec8 &\cb3 \strokec5  (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'close'\cb3 \strokec5 ] \cb3 \strokec8 <\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'ema200'\cb3 \strokec5 ])\
+        \cb3 \strokec4 # On-Balance Volume (OBV)\cb3 \strokec5 \
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 self\cb3 \strokec5 .\cb3 \strokec9 sell_enable_obv\cb3 \strokec5 .value:\
+            \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec14 OBV\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Check that volume is not 0\cb3 \strokec5 \
+        \cb3 \strokec9 conditions\cb3 \strokec5 .\cb3 \strokec8 append\cb3 \strokec5 (\cb3 \strokec9 dataframe\cb3 \strokec5 [\cb3 \strokec13 'volume'\cb3 \strokec5 ] \cb3 \strokec8 >\cb3 \strokec5  \cb3 \strokec10 0\cb3 \strokec5 )\
+\
+        \cb3 \strokec6 if\cb3 \strokec5  \cb3 \strokec9 conditions\cb3 \strokec5 :\
+            \cb3 \strokec9 dataframe\cb3 \strokec5 .\cb3 \strokec9 loc\cb3 \strokec5 [\
+                \cb3 \strokec8 reduce\cb3 \strokec5 (\cb3 \strokec11 lambda\cb3 \strokec5  \cb3 \strokec9 x\cb3 \strokec5 , \cb3 \strokec9 y\cb3 \strokec5 : \cb3 \strokec9 x\cb3 \strokec5  \cb3 \strokec12 &\cb3 \strokec5  \cb3 \strokec9 y\cb3 \strokec5 , \cb3 \strokec9 conditions\cb3 \strokec5 ),\
+                \cb3 \strokec13 'sell'\cb3 \strokec5 ] \cb3 \strokec12 =\cb3 \strokec5  \cb3 \strokec10 1\cb3 \strokec5 \
+\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec9 dataframe\cb3 \strokec5 \
+\
+}

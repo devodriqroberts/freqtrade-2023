@@ -1,0 +1,419 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 CourierNewPSMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;\red88\green137\blue67;
+\red193\green193\blue193;\red183\green111\blue179;\red67\green192\blue160;\red71\green138\blue206;\red194\green125\blue100;
+\red141\green213\blue254;\red203\green203\blue202;\red167\green197\blue151;\red212\green213\blue153;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c100000\c100000\c99985\c0;\cssrgb\c41481\c59899\c33082;
+\cssrgb\c80176\c80176\c79976;\cssrgb\c77407\c52698\c75307;\cssrgb\c30631\c78928\c69023;\cssrgb\c34146\c61677\c84338;\cssrgb\c80772\c56796\c46790;
+\cssrgb\c61545\c86704\c99884;\cssrgb\c83320\c83320\c83112;\cssrgb\c71035\c80830\c65726;\cssrgb\c86247\c86215\c66392;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec4 # pragma pylint: disable=missing-docstring, invalid-name, pointless-string-statement\cb3 \strokec5 \
+\cb3 \strokec4 # flake8: noqa: F401\cb3 \strokec5 \
+\cb3 \strokec4 # isort: skip_file\cb3 \strokec5 \
+\cb3 \strokec4 # --- Do not remove these libs ---\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  numpy \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 np\cb3 \strokec5   \cb3 \strokec4 # noqa\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 pandas\cb3 \strokec5  \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 pd\cb3 \strokec5   \cb3 \strokec4 # noqa\cb3 \strokec5 \
+\cb3 \strokec6 from\cb3 \strokec5  \cb3 \strokec7 pandas\cb3 \strokec5  \cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 DataFrame\cb3 \strokec5 \
+\cb3 \strokec6 from\cb3 \strokec5  \cb3 \strokec7 typing\cb3 \strokec5  \cb3 \strokec6 import\cb3 \strokec5  \cb3 \strokec7 Optional\cb3 \strokec5 , \cb3 \strokec7 Union\cb3 \strokec5 \
+\
+\cb3 \strokec6 from\cb3 \strokec5  freqtrade.strategy \cb3 \strokec6 import\cb3 \strokec5  (BooleanParameter, CategoricalParameter, DecimalParameter,\
+                                IStrategy, IntParameter)\
+\
+\cb3 \strokec4 # --------------------------------\cb3 \strokec5 \
+\cb3 \strokec4 # Add your lib to import here\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  talib.abstract \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 \
+\cb3 \strokec6 import\cb3 \strokec5  freqtrade.vendor.qtpylib.indicators \cb3 \strokec6 as\cb3 \strokec5  \cb3 \strokec7 qtpylib\cb3 \strokec5 \
+\
+\
+\cb3 \strokec4 # This class is a sample. Feel free to customize it.\cb3 \strokec5 \
+\cb3 \strokec8 class\cb3 \strokec5  \cb3 \strokec7 SampleStrategy\cb3 \strokec5 (\cb3 \strokec7 IStrategy\cb3 \strokec5 ):\
+    \cb3 \strokec9 """\cb3 \strokec5 \
+\cb3 \strokec9     This is a sample strategy to inspire you.\cb3 \strokec5 \
+\cb3 \strokec9     More information in https://www.freqtrade.io/en/latest/strategy-customization/\cb3 \strokec5 \
+\
+\cb3 \strokec9     You can:\cb3 \strokec5 \
+\cb3 \strokec9         :return: a Dataframe with all mandatory indicators for the strategies\cb3 \strokec5 \
+\cb3 \strokec9     - Rename the class name (Do not forget to update class_name)\cb3 \strokec5 \
+\cb3 \strokec9     - Add any methods you want to build your strategy\cb3 \strokec5 \
+\cb3 \strokec9     - Add any lib you need to build your strategy\cb3 \strokec5 \
+\
+\cb3 \strokec9     You must keep:\cb3 \strokec5 \
+\cb3 \strokec9     - the lib in the section "Do not remove these libs"\cb3 \strokec5 \
+\cb3 \strokec9     - the methods: populate_indicators, populate_entry_trend, populate_exit_trend\cb3 \strokec5 \
+\cb3 \strokec9     You should keep:\cb3 \strokec5 \
+\cb3 \strokec9     - timeframe, minimal_roi, stoploss, trailing_*\cb3 \strokec5 \
+\cb3 \strokec9     """\cb3 \strokec5 \
+    \cb3 \strokec4 # Strategy interface version - allow new iterations of the strategy interface.\cb3 \strokec5 \
+    \cb3 \strokec4 # Check the documentation or the Sample strategy to get the latest version.\cb3 \strokec5 \
+    \cb3 \strokec10 INTERFACE_VERSION\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec12 3\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Can this strategy go short?\cb3 \strokec5 \
+    \cb3 \strokec10 can_short\cb3 \strokec5 : \cb3 \strokec7 bool\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec8 False\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Minimal ROI designed for the strategy.\cb3 \strokec5 \
+    \cb3 \strokec4 # This attribute will be overridden if the config file contains "minimal_roi".\cb3 \strokec5 \
+    \cb3 \strokec10 minimal_roi\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \{\
+        \cb3 \strokec9 "60"\cb3 \strokec5 : \cb3 \strokec12 0.01\cb3 \strokec5 ,\
+        \cb3 \strokec9 "30"\cb3 \strokec5 : \cb3 \strokec12 0.02\cb3 \strokec5 ,\
+        \cb3 \strokec9 "0"\cb3 \strokec5 : \cb3 \strokec12 0.04\cb3 \strokec5 \
+    \}\
+\
+    \cb3 \strokec4 # Optimal stoploss designed for the strategy.\cb3 \strokec5 \
+    \cb3 \strokec4 # This attribute will be overridden if the config file contains "stoploss".\cb3 \strokec5 \
+    \cb3 \strokec10 stoploss\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec11 -\cb3 \strokec12 0.10\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Trailing stoploss\cb3 \strokec5 \
+    \cb3 \strokec10 trailing_stop\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec8 False\cb3 \strokec5 \
+    \cb3 \strokec4 # trailing_only_offset_is_reached = False\cb3 \strokec5 \
+    \cb3 \strokec4 # trailing_stop_positive = 0.01\cb3 \strokec5 \
+    \cb3 \strokec4 # trailing_stop_positive_offset = 0.0  # Disabled / not configured\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Optimal timeframe for the strategy.\cb3 \strokec5 \
+    \cb3 \strokec10 timeframe\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec9 '5m'\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Run "populate_indicators()" only for new candle.\cb3 \strokec5 \
+    \cb3 \strokec10 process_only_new_candles\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec8 True\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # These values can be overridden in the config.\cb3 \strokec5 \
+    \cb3 \strokec10 use_exit_signal\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec8 True\cb3 \strokec5 \
+    \cb3 \strokec10 exit_profit_only\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec8 False\cb3 \strokec5 \
+    \cb3 \strokec10 ignore_roi_if_entry_signal\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec8 False\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Hyperoptable parameters\cb3 \strokec5 \
+    \cb3 \strokec10 buy_rsi\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  IntParameter(\cb3 \strokec10 low\cb3 \strokec11 =\cb3 \strokec12 1\cb3 \strokec5 , \cb3 \strokec10 high\cb3 \strokec11 =\cb3 \strokec12 50\cb3 \strokec5 , \cb3 \strokec10 default\cb3 \strokec11 =\cb3 \strokec12 30\cb3 \strokec5 , \cb3 \strokec10 space\cb3 \strokec11 =\cb3 \strokec9 'buy'\cb3 \strokec5 , \cb3 \strokec10 optimize\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 , \cb3 \strokec10 load\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 )\
+    \cb3 \strokec10 sell_rsi\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  IntParameter(\cb3 \strokec10 low\cb3 \strokec11 =\cb3 \strokec12 50\cb3 \strokec5 , \cb3 \strokec10 high\cb3 \strokec11 =\cb3 \strokec12 100\cb3 \strokec5 , \cb3 \strokec10 default\cb3 \strokec11 =\cb3 \strokec12 70\cb3 \strokec5 , \cb3 \strokec10 space\cb3 \strokec11 =\cb3 \strokec9 'sell'\cb3 \strokec5 , \cb3 \strokec10 optimize\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 , \cb3 \strokec10 load\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 )\
+    \cb3 \strokec10 short_rsi\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  IntParameter(\cb3 \strokec10 low\cb3 \strokec11 =\cb3 \strokec12 51\cb3 \strokec5 , \cb3 \strokec10 high\cb3 \strokec11 =\cb3 \strokec12 100\cb3 \strokec5 , \cb3 \strokec10 default\cb3 \strokec11 =\cb3 \strokec12 70\cb3 \strokec5 , \cb3 \strokec10 space\cb3 \strokec11 =\cb3 \strokec9 'sell'\cb3 \strokec5 , \cb3 \strokec10 optimize\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 , \cb3 \strokec10 load\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 )\
+    \cb3 \strokec10 exit_short_rsi\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  IntParameter(\cb3 \strokec10 low\cb3 \strokec11 =\cb3 \strokec12 1\cb3 \strokec5 , \cb3 \strokec10 high\cb3 \strokec11 =\cb3 \strokec12 50\cb3 \strokec5 , \cb3 \strokec10 default\cb3 \strokec11 =\cb3 \strokec12 30\cb3 \strokec5 , \cb3 \strokec10 space\cb3 \strokec11 =\cb3 \strokec9 'buy'\cb3 \strokec5 , \cb3 \strokec10 optimize\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 , \cb3 \strokec10 load\cb3 \strokec11 =\cb3 \strokec8 True\cb3 \strokec5 )\
+\
+    \cb3 \strokec4 # Number of candles the strategy requires before producing valid signals\cb3 \strokec5 \
+    \cb3 \strokec10 startup_candle_count\cb3 \strokec5 : \cb3 \strokec7 int\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec12 30\cb3 \strokec5 \
+\
+    \cb3 \strokec4 # Optional order type mapping.\cb3 \strokec5 \
+    \cb3 \strokec10 order_types\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \{\
+        \cb3 \strokec9 'entry'\cb3 \strokec5 : \cb3 \strokec9 'limit'\cb3 \strokec5 ,\
+        \cb3 \strokec9 'exit'\cb3 \strokec5 : \cb3 \strokec9 'limit'\cb3 \strokec5 ,\
+        \cb3 \strokec9 'stoploss'\cb3 \strokec5 : \cb3 \strokec9 'market'\cb3 \strokec5 ,\
+        \cb3 \strokec9 'stoploss_on_exchange'\cb3 \strokec5 : \cb3 \strokec8 False\cb3 \strokec5 \
+    \}\
+\
+    \cb3 \strokec4 # Optional order time in force.\cb3 \strokec5 \
+    \cb3 \strokec10 order_time_in_force\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \{\
+        \cb3 \strokec9 'entry'\cb3 \strokec5 : \cb3 \strokec9 'GTC'\cb3 \strokec5 ,\
+        \cb3 \strokec9 'exit'\cb3 \strokec5 : \cb3 \strokec9 'GTC'\cb3 \strokec5 \
+    \}\
+\
+    \cb3 \strokec10 plot_config\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \{\
+        \cb3 \strokec9 'main_plot'\cb3 \strokec5 : \{\
+            \cb3 \strokec9 'tema'\cb3 \strokec5 : \{\},\
+            \cb3 \strokec9 'sar'\cb3 \strokec5 : \{\cb3 \strokec9 'color'\cb3 \strokec5 : \cb3 \strokec9 'white'\cb3 \strokec5 \},\
+        \},\
+        \cb3 \strokec9 'subplots'\cb3 \strokec5 : \{\
+            \cb3 \strokec9 "MACD"\cb3 \strokec5 : \{\
+                \cb3 \strokec9 'macd'\cb3 \strokec5 : \{\cb3 \strokec9 'color'\cb3 \strokec5 : \cb3 \strokec9 'blue'\cb3 \strokec5 \},\
+                \cb3 \strokec9 'macdsignal'\cb3 \strokec5 : \{\cb3 \strokec9 'color'\cb3 \strokec5 : \cb3 \strokec9 'orange'\cb3 \strokec5 \},\
+            \},\
+            \cb3 \strokec9 "RSI"\cb3 \strokec5 : \{\
+                \cb3 \strokec9 'rsi'\cb3 \strokec5 : \{\cb3 \strokec9 'color'\cb3 \strokec5 : \cb3 \strokec9 'red'\cb3 \strokec5 \},\
+            \}\
+        \}\
+    \}\
+\
+    \cb3 \strokec8 def\cb3 \strokec5  \cb3 \strokec13 informative_pairs\cb3 \strokec5 (\cb3 \strokec10 self\cb3 \strokec5 ):\
+        \cb3 \strokec9 """\cb3 \strokec5 \
+\cb3 \strokec9         Define additional, informative pair/interval combinations to be cached from the exchange.\cb3 \strokec5 \
+\cb3 \strokec9         These pair/interval combinations are non-tradeable, unless they are part\cb3 \strokec5 \
+\cb3 \strokec9         of the whitelist as well.\cb3 \strokec5 \
+\cb3 \strokec9         For more information, please consult the documentation\cb3 \strokec5 \
+\cb3 \strokec9         :return: List of tuples in the format (pair, interval)\cb3 \strokec5 \
+\cb3 \strokec9             Sample: return [("ETH/USDT", "5m"),\cb3 \strokec5 \
+\cb3 \strokec9                             ("BTC/USDT", "15m"),\cb3 \strokec5 \
+\cb3 \strokec9                             ]\cb3 \strokec5 \
+\cb3 \strokec9         """\cb3 \strokec5 \
+        \cb3 \strokec6 return\cb3 \strokec5  []\
+\
+    \cb3 \strokec8 def\cb3 \strokec5  \cb3 \strokec13 populate_indicators\cb3 \strokec5 (\cb3 \strokec10 self\cb3 \strokec5 , \cb3 \strokec10 dataframe\cb3 \strokec5 : \cb3 \strokec7 DataFrame\cb3 \strokec5 , \cb3 \strokec10 metadata\cb3 \strokec5 : \cb3 \strokec7 dict\cb3 \strokec5 ) -> \cb3 \strokec7 DataFrame\cb3 \strokec5 :\
+        \cb3 \strokec9 """\cb3 \strokec5 \
+\cb3 \strokec9         Adds several different TA indicators to the given DataFrame\cb3 \strokec5 \
+\
+\cb3 \strokec9         Performance Note: For the best performance be frugal on the number of indicators\cb3 \strokec5 \
+\cb3 \strokec9         you are using. Let uncomment only the indicator you are using in your strategies\cb3 \strokec5 \
+\cb3 \strokec9         or your hyperopt configuration, otherwise you will waste your memory and CPU usage.\cb3 \strokec5 \
+\cb3 \strokec9         :param dataframe: Dataframe with data from the exchange\cb3 \strokec5 \
+\cb3 \strokec9         :param metadata: Additional information, like the currently traded pair\cb3 \strokec5 \
+\cb3 \strokec9         :return: a Dataframe with all mandatory indicators for the strategies\cb3 \strokec5 \
+\cb3 \strokec9         """\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Momentum Indicators\cb3 \strokec5 \
+        \cb3 \strokec4 # ------------------------------------\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # ADX\cb3 \strokec5 \
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'adx'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .ADX(\cb3 \strokec10 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # # Plus Directional Indicator / Movement\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['plus_dm'] = ta.PLUS_DM(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['plus_di'] = ta.PLUS_DI(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Minus Directional Indicator / Movement\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['minus_dm'] = ta.MINUS_DM(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['minus_di'] = ta.MINUS_DI(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Aroon, Aroon Oscillator\cb3 \strokec5 \
+        \cb3 \strokec4 # aroon = ta.AROON(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['aroonup'] = aroon['aroonup']\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['aroondown'] = aroon['aroondown']\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['aroonosc'] = ta.AROONOSC(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Awesome Oscillator\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ao'] = qtpylib.awesome_oscillator(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Keltner Channel\cb3 \strokec5 \
+        \cb3 \strokec4 # keltner = qtpylib.keltner_channel(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["kc_upperband"] = keltner["upper"]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["kc_lowerband"] = keltner["lower"]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["kc_middleband"] = keltner["mid"]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["kc_percent"] = (\cb3 \strokec5 \
+        \cb3 \strokec4 #     (dataframe["close"] - dataframe["kc_lowerband"]) /\cb3 \strokec5 \
+        \cb3 \strokec4 #     (dataframe["kc_upperband"] - dataframe["kc_lowerband"])\cb3 \strokec5 \
+        \cb3 \strokec4 # )\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["kc_width"] = (\cb3 \strokec5 \
+        \cb3 \strokec4 #     (dataframe["kc_upperband"] - dataframe["kc_lowerband"]) / dataframe["kc_middleband"]\cb3 \strokec5 \
+        \cb3 \strokec4 # )\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Ultimate Oscillator\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['uo'] = ta.ULTOSC(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Commodity Channel Index: values [Oversold:-100, Overbought:100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['cci'] = ta.CCI(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # RSI\cb3 \strokec5 \
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'rsi'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .RSI(\cb3 \strokec10 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # # Inverse Fisher transform on RSI: values [-1.0, 1.0] (https://goo.gl/2JGGoy)\cb3 \strokec5 \
+        \cb3 \strokec4 # rsi = 0.1 * (dataframe['rsi'] - 50)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['fisher_rsi'] = (np.exp(2 * rsi) - 1) / (np.exp(2 * rsi) + 1)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Inverse Fisher transform on RSI normalized: values [0.0, 100.0] (https://goo.gl/2JGGoy)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['fisher_rsi_norma'] = 50 * (dataframe['fisher_rsi'] + 1)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Stochastic Slow\cb3 \strokec5 \
+        \cb3 \strokec4 # stoch = ta.STOCH(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['slowd'] = stoch['slowd']\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['slowk'] = stoch['slowk']\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Stochastic Fast\cb3 \strokec5 \
+        \cb3 \strokec10 stoch_fast\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .STOCHF(\cb3 \strokec10 dataframe\cb3 \strokec5 )\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'fastd'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 stoch_fast\cb3 \strokec5 [\cb3 \strokec9 'fastd'\cb3 \strokec5 ]\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'fastk'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 stoch_fast\cb3 \strokec5 [\cb3 \strokec9 'fastk'\cb3 \strokec5 ]\
+\
+        \cb3 \strokec4 # # Stochastic RSI\cb3 \strokec5 \
+        \cb3 \strokec4 # Please read https://github.com/freqtrade/freqtrade/issues/2961 before using this.\cb3 \strokec5 \
+        \cb3 \strokec4 # STOCHRSI is NOT aligned with tradingview, which may result in non-expected results.\cb3 \strokec5 \
+        \cb3 \strokec4 # stoch_rsi = ta.STOCHRSI(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['fastd_rsi'] = stoch_rsi['fastd']\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['fastk_rsi'] = stoch_rsi['fastk']\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # MACD\cb3 \strokec5 \
+        \cb3 \strokec10 macd\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .MACD(\cb3 \strokec10 dataframe\cb3 \strokec5 )\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'macd'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 macd\cb3 \strokec5 [\cb3 \strokec9 'macd'\cb3 \strokec5 ]\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'macdsignal'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 macd\cb3 \strokec5 [\cb3 \strokec9 'macdsignal'\cb3 \strokec5 ]\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'macdhist'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 macd\cb3 \strokec5 [\cb3 \strokec9 'macdhist'\cb3 \strokec5 ]\
+\
+        \cb3 \strokec4 # MFI\cb3 \strokec5 \
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'mfi'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .MFI(\cb3 \strokec10 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # # ROC\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['roc'] = ta.ROC(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Overlap Studies\cb3 \strokec5 \
+        \cb3 \strokec4 # ------------------------------------\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Bollinger Bands\cb3 \strokec5 \
+        \cb3 \strokec10 bollinger\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 qtpylib\cb3 \strokec5 .bollinger_bands(\cb3 \strokec7 qtpylib\cb3 \strokec5 .typical_price(\cb3 \strokec10 dataframe\cb3 \strokec5 ), \cb3 \strokec10 window\cb3 \strokec11 =\cb3 \strokec12 20\cb3 \strokec5 , \cb3 \strokec10 stds\cb3 \strokec11 =\cb3 \strokec12 2\cb3 \strokec5 )\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'bb_lowerband'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 bollinger\cb3 \strokec5 [\cb3 \strokec9 'lower'\cb3 \strokec5 ]\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'bb_middleband'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 bollinger\cb3 \strokec5 [\cb3 \strokec9 'mid'\cb3 \strokec5 ]\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'bb_upperband'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 bollinger\cb3 \strokec5 [\cb3 \strokec9 'upper'\cb3 \strokec5 ]\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_percent"\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  (\
+            (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "close"\cb3 \strokec5 ] \cb3 \strokec13 -\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_lowerband"\cb3 \strokec5 ]) \cb3 \strokec13 /\cb3 \strokec5 \
+            (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_upperband"\cb3 \strokec5 ] \cb3 \strokec13 -\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_lowerband"\cb3 \strokec5 ])\
+        )\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_width"\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  (\
+            (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_upperband"\cb3 \strokec5 ] \cb3 \strokec13 -\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_lowerband"\cb3 \strokec5 ]) \cb3 \strokec13 /\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 "bb_middleband"\cb3 \strokec5 ]\
+        )\
+\
+        \cb3 \strokec4 # Bollinger Bands - Weighted (EMA based instead of SMA)\cb3 \strokec5 \
+        \cb3 \strokec4 # weighted_bollinger = qtpylib.weighted_bollinger_bands(\cb3 \strokec5 \
+        \cb3 \strokec4 #     qtpylib.typical_price(dataframe), window=20, stds=2\cb3 \strokec5 \
+        \cb3 \strokec4 # )\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["wbb_upperband"] = weighted_bollinger["upper"]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["wbb_lowerband"] = weighted_bollinger["lower"]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["wbb_middleband"] = weighted_bollinger["mid"]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["wbb_percent"] = (\cb3 \strokec5 \
+        \cb3 \strokec4 #     (dataframe["close"] - dataframe["wbb_lowerband"]) /\cb3 \strokec5 \
+        \cb3 \strokec4 #     (dataframe["wbb_upperband"] - dataframe["wbb_lowerband"])\cb3 \strokec5 \
+        \cb3 \strokec4 # )\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe["wbb_width"] = (\cb3 \strokec5 \
+        \cb3 \strokec4 #     (dataframe["wbb_upperband"] - dataframe["wbb_lowerband"]) /\cb3 \strokec5 \
+        \cb3 \strokec4 #     dataframe["wbb_middleband"]\cb3 \strokec5 \
+        \cb3 \strokec4 # )\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # EMA - Exponential Moving Average\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ema3'] = ta.EMA(dataframe, timeperiod=3)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # SMA - Simple Moving Average\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['sma3'] = ta.SMA(dataframe, timeperiod=3)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['sma5'] = ta.SMA(dataframe, timeperiod=5)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['sma10'] = ta.SMA(dataframe, timeperiod=10)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['sma21'] = ta.SMA(dataframe, timeperiod=21)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['sma100'] = ta.SMA(dataframe, timeperiod=100)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Parabolic SAR\cb3 \strokec5 \
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'sar'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .SAR(\cb3 \strokec10 dataframe\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # TEMA - Triple Exponential Moving Average\cb3 \strokec5 \
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .TEMA(\cb3 \strokec10 dataframe\cb3 \strokec5 , \cb3 \strokec10 timeperiod\cb3 \strokec11 =\cb3 \strokec12 9\cb3 \strokec5 )\
+\
+        \cb3 \strokec4 # Cycle Indicator\cb3 \strokec5 \
+        \cb3 \strokec4 # ------------------------------------\cb3 \strokec5 \
+        \cb3 \strokec4 # Hilbert Transform Indicator - SineWave\cb3 \strokec5 \
+        \cb3 \strokec10 hilbert\cb3 \strokec5  \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec7 ta\cb3 \strokec5 .HT_SINE(\cb3 \strokec10 dataframe\cb3 \strokec5 )\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'htsine'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 hilbert\cb3 \strokec5 [\cb3 \strokec9 'sine'\cb3 \strokec5 ]\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'htleadsine'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec10 hilbert\cb3 \strokec5 [\cb3 \strokec9 'leadsine'\cb3 \strokec5 ]\
+\
+        \cb3 \strokec4 # Pattern Recognition - Bullish candlestick patterns\cb3 \strokec5 \
+        \cb3 \strokec4 # ------------------------------------\cb3 \strokec5 \
+        \cb3 \strokec4 # # Hammer: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLHAMMER'] = ta.CDLHAMMER(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Inverted Hammer: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLINVERTEDHAMMER'] = ta.CDLINVERTEDHAMMER(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Dragonfly Doji: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLDRAGONFLYDOJI'] = ta.CDLDRAGONFLYDOJI(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Piercing Line: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLPIERCING'] = ta.CDLPIERCING(dataframe) # values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # # Morningstar: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLMORNINGSTAR'] = ta.CDLMORNINGSTAR(dataframe) # values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # # Three White Soldiers: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDL3WHITESOLDIERS'] = ta.CDL3WHITESOLDIERS(dataframe) # values [0, 100]\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Pattern Recognition - Bearish candlestick patterns\cb3 \strokec5 \
+        \cb3 \strokec4 # ------------------------------------\cb3 \strokec5 \
+        \cb3 \strokec4 # # Hanging Man: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLHANGINGMAN'] = ta.CDLHANGINGMAN(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Shooting Star: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLSHOOTINGSTAR'] = ta.CDLSHOOTINGSTAR(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Gravestone Doji: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLGRAVESTONEDOJI'] = ta.CDLGRAVESTONEDOJI(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Dark Cloud Cover: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLDARKCLOUDCOVER'] = ta.CDLDARKCLOUDCOVER(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Evening Doji Star: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLEVENINGDOJISTAR'] = ta.CDLEVENINGDOJISTAR(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Evening Star: values [0, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLEVENINGSTAR'] = ta.CDLEVENINGSTAR(dataframe)\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Pattern Recognition - Bullish/Bearish candlestick patterns\cb3 \strokec5 \
+        \cb3 \strokec4 # ------------------------------------\cb3 \strokec5 \
+        \cb3 \strokec4 # # Three Line Strike: values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDL3LINESTRIKE'] = ta.CDL3LINESTRIKE(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # # Spinning Top: values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLSPINNINGTOP'] = ta.CDLSPINNINGTOP(dataframe) # values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # # Engulfing: values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLENGULFING'] = ta.CDLENGULFING(dataframe) # values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # # Harami: values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDLHARAMI'] = ta.CDLHARAMI(dataframe) # values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # # Three Outside Up/Down: values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDL3OUTSIDE'] = ta.CDL3OUTSIDE(dataframe) # values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # # Three Inside Up/Down: values [0, -100, 100]\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['CDL3INSIDE'] = ta.CDL3INSIDE(dataframe) # values [0, -100, 100]\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # # Chart type\cb3 \strokec5 \
+        \cb3 \strokec4 # # ------------------------------------\cb3 \strokec5 \
+        \cb3 \strokec4 # # Heikin Ashi Strategy\cb3 \strokec5 \
+        \cb3 \strokec4 # heikinashi = qtpylib.heikinashi(dataframe)\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ha_open'] = heikinashi['open']\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ha_close'] = heikinashi['close']\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ha_high'] = heikinashi['high']\cb3 \strokec5 \
+        \cb3 \strokec4 # dataframe['ha_low'] = heikinashi['low']\cb3 \strokec5 \
+\
+        \cb3 \strokec4 # Retrieve best bid and best ask from the orderbook\cb3 \strokec5 \
+        \cb3 \strokec4 # ------------------------------------\cb3 \strokec5 \
+        \cb3 \strokec9 """\cb3 \strokec5 \
+\cb3 \strokec9         # first check if dataprovider is available\cb3 \strokec5 \
+\cb3 \strokec9         if self.dp:\cb3 \strokec5 \
+\cb3 \strokec9             if self.dp.runmode.value in ('live', 'dry_run'):\cb3 \strokec5 \
+\cb3 \strokec9                 ob = self.dp.orderbook(metadata['pair'], 1)\cb3 \strokec5 \
+\cb3 \strokec9                 dataframe['best_bid'] = ob['bids'][0][0]\cb3 \strokec5 \
+\cb3 \strokec9                 dataframe['best_ask'] = ob['asks'][0][0]\cb3 \strokec5 \
+\cb3 \strokec9         """\cb3 \strokec5 \
+\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 \
+\
+    \cb3 \strokec8 def\cb3 \strokec5  \cb3 \strokec13 populate_entry_trend\cb3 \strokec5 (\cb3 \strokec10 self\cb3 \strokec5 , \cb3 \strokec10 dataframe\cb3 \strokec5 : \cb3 \strokec7 DataFrame\cb3 \strokec5 , \cb3 \strokec10 metadata\cb3 \strokec5 : \cb3 \strokec7 dict\cb3 \strokec5 ) -> \cb3 \strokec7 DataFrame\cb3 \strokec5 :\
+        \cb3 \strokec9 """\cb3 \strokec5 \
+\cb3 \strokec9         Based on TA indicators, populates the entry signal for the given dataframe\cb3 \strokec5 \
+\cb3 \strokec9         :param dataframe: DataFrame\cb3 \strokec5 \
+\cb3 \strokec9         :param metadata: Additional information, like the currently traded pair\cb3 \strokec5 \
+\cb3 \strokec9         :return: DataFrame with entry columns populated\cb3 \strokec5 \
+\cb3 \strokec9         """\cb3 \strokec5 \
+        \cb3 \strokec10 dataframe\cb3 \strokec5 .\cb3 \strokec10 loc\cb3 \strokec5 [\
+            (\
+                \cb3 \strokec4 # Signal: RSI crosses above 30\cb3 \strokec5 \
+                (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'rsi'\cb3 \strokec5 ], \cb3 \strokec10 self\cb3 \strokec5 .\cb3 \strokec10 buy_rsi\cb3 \strokec5 .value)) \cb3 \strokec13 &\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 <=\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'bb_middleband'\cb3 \strokec5 ]) \cb3 \strokec13 &\cb3 \strokec5   \cb3 \strokec4 # Guard: tema below BB middle\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ].\cb3 \strokec13 shift\cb3 \strokec5 (\cb3 \strokec12 1\cb3 \strokec5 )) \cb3 \strokec13 &\cb3 \strokec5   \cb3 \strokec4 # Guard: tema is raising\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'volume'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec12 0\cb3 \strokec5 )  \cb3 \strokec4 # Make sure Volume is not 0\cb3 \strokec5 \
+            ),\
+            \cb3 \strokec9 'enter_long'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec12 1\cb3 \strokec5 \
+\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 .\cb3 \strokec10 loc\cb3 \strokec5 [\
+            (\
+                \cb3 \strokec4 # Signal: RSI crosses above 70\cb3 \strokec5 \
+                (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'rsi'\cb3 \strokec5 ], \cb3 \strokec10 self\cb3 \strokec5 .\cb3 \strokec10 short_rsi\cb3 \strokec5 .value)) \cb3 \strokec13 &\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'bb_middleband'\cb3 \strokec5 ]) \cb3 \strokec13 &\cb3 \strokec5   \cb3 \strokec4 # Guard: tema above BB middle\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 <\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ].\cb3 \strokec13 shift\cb3 \strokec5 (\cb3 \strokec12 1\cb3 \strokec5 )) \cb3 \strokec13 &\cb3 \strokec5   \cb3 \strokec4 # Guard: tema is falling\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'volume'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec12 0\cb3 \strokec5 )  \cb3 \strokec4 # Make sure Volume is not 0\cb3 \strokec5 \
+            ),\
+            \cb3 \strokec9 'enter_short'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec12 1\cb3 \strokec5 \
+\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 \
+\
+    \cb3 \strokec8 def\cb3 \strokec5  \cb3 \strokec13 populate_exit_trend\cb3 \strokec5 (\cb3 \strokec10 self\cb3 \strokec5 , \cb3 \strokec10 dataframe\cb3 \strokec5 : \cb3 \strokec7 DataFrame\cb3 \strokec5 , \cb3 \strokec10 metadata\cb3 \strokec5 : \cb3 \strokec7 dict\cb3 \strokec5 ) -> \cb3 \strokec7 DataFrame\cb3 \strokec5 :\
+        \cb3 \strokec9 """\cb3 \strokec5 \
+\cb3 \strokec9         Based on TA indicators, populates the exit signal for the given dataframe\cb3 \strokec5 \
+\cb3 \strokec9         :param dataframe: DataFrame\cb3 \strokec5 \
+\cb3 \strokec9         :param metadata: Additional information, like the currently traded pair\cb3 \strokec5 \
+\cb3 \strokec9         :return: DataFrame with exit columns populated\cb3 \strokec5 \
+\cb3 \strokec9         """\cb3 \strokec5 \
+        \cb3 \strokec10 dataframe\cb3 \strokec5 .\cb3 \strokec10 loc\cb3 \strokec5 [\
+            (\
+                \cb3 \strokec4 # Signal: RSI crosses above 70\cb3 \strokec5 \
+                (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'rsi'\cb3 \strokec5 ], \cb3 \strokec10 self\cb3 \strokec5 .\cb3 \strokec10 sell_rsi\cb3 \strokec5 .value)) \cb3 \strokec13 &\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'bb_middleband'\cb3 \strokec5 ]) \cb3 \strokec13 &\cb3 \strokec5   \cb3 \strokec4 # Guard: tema above BB middle\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 <\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ].\cb3 \strokec13 shift\cb3 \strokec5 (\cb3 \strokec12 1\cb3 \strokec5 )) \cb3 \strokec13 &\cb3 \strokec5   \cb3 \strokec4 # Guard: tema is falling\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'volume'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec12 0\cb3 \strokec5 )  \cb3 \strokec4 # Make sure Volume is not 0\cb3 \strokec5 \
+            ),\
+\
+            \cb3 \strokec9 'exit_long'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec12 1\cb3 \strokec5 \
+\
+        \cb3 \strokec10 dataframe\cb3 \strokec5 .\cb3 \strokec10 loc\cb3 \strokec5 [\
+            (\
+                \cb3 \strokec4 # Signal: RSI crosses above 30\cb3 \strokec5 \
+                (\cb3 \strokec7 qtpylib\cb3 \strokec5 .crossed_above(\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'rsi'\cb3 \strokec5 ], \cb3 \strokec10 self\cb3 \strokec5 .\cb3 \strokec10 exit_short_rsi\cb3 \strokec5 .value)) \cb3 \strokec13 &\cb3 \strokec5 \
+                \cb3 \strokec4 # Guard: tema below BB middle\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 <=\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'bb_middleband'\cb3 \strokec5 ]) \cb3 \strokec13 &\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'tema'\cb3 \strokec5 ].\cb3 \strokec13 shift\cb3 \strokec5 (\cb3 \strokec12 1\cb3 \strokec5 )) \cb3 \strokec13 &\cb3 \strokec5   \cb3 \strokec4 # Guard: tema is raising\cb3 \strokec5 \
+                (\cb3 \strokec10 dataframe\cb3 \strokec5 [\cb3 \strokec9 'volume'\cb3 \strokec5 ] \cb3 \strokec13 >\cb3 \strokec5  \cb3 \strokec12 0\cb3 \strokec5 )  \cb3 \strokec4 # Make sure Volume is not 0\cb3 \strokec5 \
+            ),\
+            \cb3 \strokec9 'exit_short'\cb3 \strokec5 ] \cb3 \strokec11 =\cb3 \strokec5  \cb3 \strokec12 1\cb3 \strokec5 \
+\
+        \cb3 \strokec6 return\cb3 \strokec5  \cb3 \strokec10 dataframe\cb3 \strokec5 \
+\
+}
