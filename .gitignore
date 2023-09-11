@@ -5,5 +5,4 @@
 /user_data/logs
 /user_data/notebooks
 /user_data/archive_strategies
-/user_data/config.json
-/user_data/config-with-dynamic-pairlist.json
+*config*.json
