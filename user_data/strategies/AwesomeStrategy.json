@@ -1,0 +1,63 @@
+{
+  "strategy_name": "AwesomeStrategy",
+  "params": {
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.319,
+      "trailing_stop_positive_offset": 0.402,
+      "trailing_only_offset_is_reached": true
+    },
+    "max_open_trades": {
+      "max_open_trades": 5
+    },
+    "buy": {
+      "buy_adx_strength": 38,
+      "buy_bollinger_profile": "standard_default",
+      "buy_cci_oversold": -179,
+      "buy_chaikin_limit": 0.131,
+      "buy_chaikin_profile": "higher_atr",
+      "buy_ema": "short_term",
+      "buy_enable_mab": false,
+      "buy_indicator_combination": "CHIAKIN and STOCH",
+      "buy_mab": "ema15",
+      "buy_macd_profile": "short_term_trend",
+      "buy_obv_window": 28,
+      "buy_rsi_oversold": 26,
+      "buy_rsi_period": 10,
+      "macd_histogram_threshold": 0.144,
+      "max_epa": 1,
+      "risk_per_trade": 0.081
+    },
+    "sell": {
+      "sell_adx_strength": 21,
+      "sell_bollinger_profile": "trend_confirmation",
+      "sell_cci_overbought": 156,
+      "sell_chaikin_limit": 0.056,
+      "sell_chaikin_profile": "higher_atr",
+      "sell_ema": "longer_term",
+      "sell_indicator_combination": "BOLLINGER and RSI",
+      "sell_macd_profile": "quick_intraday",
+      "sell_obv_window": 11,
+      "sell_rsi_overbought": 89,
+      "sell_rsi_period": 11
+    },
+    "protection": {
+      "cooldown_lookback": 47,
+      "stop_duration": 152,
+      "use_drawdown_protection": false,
+      "use_low_profit_protection": true,
+      "use_stop_protection": true
+    },
+    "roi": {
+      "0": 0.453,
+      "418": 0.187,
+      "654": 0.078,
+      "923": 0
+    },
+    "stoploss": {
+      "stoploss": -0.263
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2023-09-11 04:27:02.521996+00:00"
+}

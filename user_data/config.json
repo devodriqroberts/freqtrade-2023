@@ -37,16 +37,7 @@
     "password": "",
     "ccxt_config": {},
     "ccxt_async_config": {},
-    "pair_whitelist": [
-      "SOL/USDT",
-      "XLM/USDT",
-      "LTC/USDT",
-      "HBAR/USDT",
-      "FET/USDT",
-      "MATIC/USDT",
-      "BTC/USDT",
-      "GALA/USDT"
-    ],
+    "pair_whitelist": ["FET/USDT", "GALA/USDT", "HBAR/USDT", "SOL/USDT"],
     "pair_blacklist": ["BNB/USDT", "USDC/USDT"]
   },
   "timeframe": "1h",
