@@ -154,6 +154,8 @@ class AwesomeStrategy(IStrategy):
     sell_rsi_period     = IntParameter(min(rsi_periods), max(rsi_periods), default=random.randint(8, 14), space="sell", optimize=True)
     buy_rsi_oversold    = IntParameter(low=10, high=50, default=random.randint(10, 50), space="buy", optimize=True)
     sell_rsi_overbought = IntParameter(low=50, high=90, default=random.randint(50, 90), space="sell", optimize=True)
+    buy_rsi_cross       = CategoricalParameter(["ABOVE", "BELOW"], default=random.choice(["ABOVE", "BELOW"]), space="buy", optimize=True)
+    sell_rsi_cross      = CategoricalParameter(["ABOVE", "BELOW"], default=random.choice(["ABOVE", "BELOW"]), space="sell", optimize=True)
     
 
     # Moving Average Convergence Divergence (MACD) -- Lagging
@@ -218,6 +220,8 @@ class AwesomeStrategy(IStrategy):
     bollinger_profile_names = list(bollinger_profiles.keys())
     buy_bollinger_profile   = CategoricalParameter(bollinger_profile_names, default=random.choice(bollinger_profile_names), space="buy", optimize=True)
     sell_bollinger_profile  = CategoricalParameter(bollinger_profile_names, default=random.choice(bollinger_profile_names), space="sell", optimize=True)
+    buy_bollinger_cross     = CategoricalParameter(["ABOVE", "BELOW"], default=random.choice(["ABOVE", "BELOW"]), space="buy", optimize=True)
+    sell_bollinger_cross    = CategoricalParameter(["ABOVE", "BELOW"], default=random.choice(["ABOVE", "BELOW"]), space="sell", optimize=True)
 
     # Chaikin Volatility Indicator
     chaikin_profiles = {
@@ -320,39 +324,44 @@ class AwesomeStrategy(IStrategy):
     # sell_enable_obv = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
 
 
-    indicator_combinations = [
-        "ADX and ICHIMOKU",
-        "EMA CROSSOVER",
-        "CHIAKIN and CCI",
-        "CHIAKIN and RSI",
-        "CHIAKIN and STOCH",
-        "BOLLINGER and CCI",
-        "BOLLINGER and RSI",
-        "BOLLINGER and STOCH",
-        "MACD and RSI"
-    ]
+    # indicator_combinations = [
+    #     "ADX and ICHIMOKU",
+    #     "EMA CROSSOVER",
+    #     "CHIAKIN and CCI",
+    #     "CHIAKIN and RSI",
+    #     "CHIAKIN and STOCH",
+    #     "BOLLINGER and CCI",
+    #     "BOLLINGER and RSI",
+    #     "BOLLINGER and STOCH",
+    #     "MACD and RSI"
+    # ]
 
-    buy_indicator_combination  = CategoricalParameter(indicator_combinations, default=random.choice(indicator_combinations), space="buy", optimize=True)
-    sell_indicator_combination = CategoricalParameter(indicator_combinations, default=random.choice(indicator_combinations), space="sell", optimize=True)
+    # buy_indicator_combination  = CategoricalParameter(indicator_combinations, default=random.choice(indicator_combinations), space="buy", optimize=True)
+    # sell_indicator_combination = CategoricalParameter(indicator_combinations, default=random.choice(indicator_combinations), space="sell", optimize=True)
 
-    # buy_enable_adx          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_adx          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
     # buy_enable_bollinger    = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
-    # buy_enable_cci          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
-    # buy_enable_ema          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
-    # buy_enable_ichimoku     = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
-    # buy_enable_macd         = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
-    # buy_enable_mab          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_cci          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_ema          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_ichimoku     = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_macd         = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_mab          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
     # buy_enable_rsi          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
-    # buy_enable_stoch        = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_stoch        = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_obv          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_sar          = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
+    buy_enable_hist_cross   = CategoricalParameter([True, False], default=random.choice([True, False]), space="buy", optimize=True)
     
-    # sell_enable_adx          = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_adx         = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
     # sell_enable_bollinger    = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
-    # sell_enable_cci          = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
-    # sell_enable_ema          = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
-    # sell_enable_ichimoku     = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
-    # sell_enable_macd         = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_cci         = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_ema         = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_ichimoku    = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_macd        = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
     # sell_enable_rsi          = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
-    # sell_enable_stoch        = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_stoch       = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_obv         = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
+    sell_enable_sar         = CategoricalParameter([True, False], default=random.choice([True, False]), space="sell", optimize=True)
 
 
 
@@ -536,6 +545,7 @@ class AwesomeStrategy(IStrategy):
 
         ### Momentum Indicators ###
         # RSI
+        RSI_CROSS_ABOVE = (qtpylib.crossed_above(dataframe[f'rsi{self.buy_rsi_period.value}'], self.buy_rsi_oversold.value))
         RSI_CROSS_BELOW = (qtpylib.crossed_above(dataframe[f'rsi{self.buy_rsi_period.value}'], self.buy_rsi_oversold.value))
         # Stochastic Oscillator
         STOCH_CROSS_ABOVE = (dataframe['fastk'] > dataframe['fastd'])
@@ -548,6 +558,7 @@ class AwesomeStrategy(IStrategy):
         # Bollinger Bands
         dataframe['bb_lowerband'] = dataframe[f'bb_lowerband_{self.buy_bollinger_profile.value}']
         BOLLINGER_CROSS_ABOVE = (qtpylib.crossed_above(dataframe['close'], dataframe['bb_lowerband']))
+        BOLLINGER_CROSS_BELOW = (qtpylib.crossed_below(dataframe['close'], dataframe['bb_lowerband']))
 
         # Chaikin
         CHAIKIN = (dataframe[f'chaikin_{self.buy_chaikin_profile.value}'] > self.buy_chaikin_limit.value)
@@ -556,41 +567,68 @@ class AwesomeStrategy(IStrategy):
         OBV = (dataframe['obv'] > dataframe['obv'].rolling(window=self.buy_obv_window.value).mean())
 
 
-        indicator_combination = self.buy_indicator_combination.value
-        if "EMA" in indicator_combination:
-            conditions.append(EMA)
-        if "ICHIMOKU" in indicator_combination:
-            conditions.append(ICHIMOKU)
-        if "SAR" in indicator_combination:
-            conditions.append(SAR)
-        if "ADX" in indicator_combination:
+        if self.buy_enable_adx.value:
             conditions.append(ADX)
-        # if "MAB" in indicator_combination:
-        #     conditions.append(MAB)
-        if "RSI" in indicator_combination:
-            conditions.append(RSI_CROSS_BELOW)
-        if "STOCH" in indicator_combination:
-            conditions.append(STOCH_CROSS_ABOVE)
-        if "MACD" in indicator_combination:
-            conditions.append(BULLISH_MACD)
-        if "CCI" in indicator_combination:
+        if self.buy_enable_cci.value:
             conditions.append(CCI)
-        if "BOLLINGER" in indicator_combination:
-            conditions.append(BOLLINGER_CROSS_ABOVE)
-        if "CHAIKIN" in indicator_combination:
-            conditions.append(CHAIKIN)
-
-            
-        if "OBV" in indicator_combination:
-        # if self.buy_enable_obv.value:
-            conditions.append(OBV)
-
-
+        if self.buy_enable_ema.value:
+            conditions.append(EMA)
+        if self.buy_enable_ichimoku.value:
+            conditions.append(ICHIMOKU)
+        if self.buy_enable_macd.value:
+            conditions.append(BULLISH_MACD)
         if self.buy_enable_mab.value:
             conditions.append(MAB)
+        if self.buy_enable_stoch.value:
+            conditions.append(STOCH_CROSS_ABOVE)
+        if self.buy_enable_obv.value:
+            conditions.append(OBV)
+        if self.buy_enable_sar.value:
+            conditions.append(SAR)
+
+        if self.buy_bollinger_cross.value == "ABOVE":
+            conditions.append(BOLLINGER_CROSS_ABOVE)
+        if self.buy_bollinger_cross.value == "BELOW":
+            conditions.append(BOLLINGER_CROSS_BELOW)
+
+        if self.buy_rsi_cross.value == "ABOVE":
+            conditions.append(RSI_CROSS_ABOVE)
+        if self.buy_rsi_cross.value == "BELOW":
+            conditions.append(RSI_CROSS_BELOW)
+
+        # indicator_combination = self.buy_indicator_combination.value
+        # if "EMA" in indicator_combination:
+        #     conditions.append(EMA)
+        # if "ICHIMOKU" in indicator_combination:
+        #     conditions.append(ICHIMOKU)
+        # if "SAR" in indicator_combination:
+        #     conditions.append(SAR)
+        # if "ADX" in indicator_combination:
+        #     conditions.append(ADX)
+        # # if "MAB" in indicator_combination:
+        # #     conditions.append(MAB)
+        # # if "RSI" in indicator_combination:
+        #     # conditions.append(RSI_CROSS_BELOW)
+        # if "STOCH" in indicator_combination:
+        #     conditions.append(STOCH_CROSS_ABOVE)
+        # if "MACD" in indicator_combination:
+        #     conditions.append(BULLISH_MACD)
+        # if "CCI" in indicator_combination:
+        #     conditions.append(CCI)
+        # # if "BOLLINGER" in indicator_combination:
+        #     # conditions.append(BOLLINGER_CROSS_ABOVE)
+        # if "CHAIKIN" in indicator_combination:
+        #     conditions.append(CHAIKIN)
+
+            
+        # if "OBV" in indicator_combination:
+        # # if self.buy_enable_obv.value:
+        #     conditions.append(OBV)
+
 
         # Add confirmation signal: Check MACD histogram
-        conditions.append(qtpylib.crossed_above(dataframe[f'macd_histogram_{self.buy_macd_profile.value}'], self.macd_histogram_threshold.value))
+        if self.buy_enable_hist_cross.value:
+            conditions.append(qtpylib.crossed_above(dataframe[f'macd_histogram_{self.buy_macd_profile.value}'], self.macd_histogram_threshold.value))
 
         # Check that volume is not 0
         conditions.append(dataframe['volume'] > 0)
@@ -622,6 +660,7 @@ class AwesomeStrategy(IStrategy):
         BEARISH_MACD = (qtpylib.crossed_below(dataframe[f"macd_{self.sell_macd_profile.value}"], dataframe[f"macdsignal_{self.sell_macd_profile.value}"])) | (dataframe[f"macd_{self.sell_macd_profile.value}"] < 0)
         # RSI
         RSI_CROSS_ABOVE = (qtpylib.crossed_above(dataframe[f'rsi{self.sell_rsi_period.value}'], self.sell_rsi_overbought.value))
+        RSI_CROSS_BELOW = (qtpylib.crossed_below(dataframe[f'rsi{self.sell_rsi_period.value}'], self.sell_rsi_overbought.value))
         # Stochastic Oscillator
         STOCH_CROSS_BELOW = (dataframe['fastk'] < dataframe['fastd'])
         # CCI
@@ -631,6 +670,7 @@ class AwesomeStrategy(IStrategy):
         ### Volatility Indicators ###
         # Bollinger Bands
         dataframe['bb_upperband'] = dataframe[f'bb_upperband_{self.sell_bollinger_profile.value}']
+        BOLLINGER_CROSS_ABOVE = (qtpylib.crossed_above(dataframe['close'], dataframe['bb_upperband']))
         BOLLINGER_CROSS_BELOW = (qtpylib.crossed_below(dataframe['close'], dataframe['bb_upperband']))
 
         # Chaikin
@@ -639,30 +679,56 @@ class AwesomeStrategy(IStrategy):
         # OBV
         OBV = (dataframe['obv'] < dataframe['obv'].rolling(window=self.sell_obv_window.value).mean()) & (dataframe['close'] < dataframe['ema200'])
 
-
-        indicator_combination = self.sell_indicator_combination.value
-        if "EMA" in indicator_combination:
-            conditions.append(EMA)
-        if "ICHIMOKU" in indicator_combination:
-            conditions.append(ICHIMOKU)
-        if "SAR" in indicator_combination:
-            conditions.append(SAR)
-        if "ADX" in indicator_combination:
+        if self.sell_enable_adx.value:
             conditions.append(ADX)
-        if "RSI" in indicator_combination:
-            conditions.append(RSI_CROSS_ABOVE)
-        if "STOCH" in indicator_combination:
-            conditions.append(STOCH_CROSS_BELOW)
-        if "MACD" in indicator_combination:
-            conditions.append(BEARISH_MACD)
-        if "CCI" in indicator_combination:
+        if self.sell_enable_cci.value:
             conditions.append(CCI)
-        if "BOLLINGER" in indicator_combination:
-            conditions.append(BOLLINGER_CROSS_BELOW)
-        if "CHAIKIN" in indicator_combination:
-            conditions.append(CHAIKIN)
-        if "OBV" in indicator_combination:
+        if self.sell_enable_ema.value:
+            conditions.append(EMA)
+        if self.sell_enable_ichimoku.value:
+            conditions.append(ICHIMOKU)
+        if self.sell_enable_macd.value:
+            conditions.append(BEARISH_MACD)
+        if self.sell_enable_stoch.value:
+            conditions.append(STOCH_CROSS_BELOW)
+        if self.sell_enable_obv.value:
             conditions.append(OBV)
+        if self.sell_enable_sar.value:
+            conditions.append(SAR)
+
+        if self.sell_bollinger_cross.value == "ABOVE":
+            conditions.append(BOLLINGER_CROSS_ABOVE)
+        if self.sell_bollinger_cross.value == "BELOW":
+            conditions.append(BOLLINGER_CROSS_BELOW)
+
+        if self.sell_rsi_cross.value == "ABOVE":
+            conditions.append(RSI_CROSS_ABOVE)
+        if self.sell_rsi_cross.value == "BELOW":
+            conditions.append(RSI_CROSS_BELOW)
+
+        # indicator_combination = self.sell_indicator_combination.value
+        # if "EMA" in indicator_combination:
+        #     conditions.append(EMA)
+        # if "ICHIMOKU" in indicator_combination:
+        #     conditions.append(ICHIMOKU)
+        # if "SAR" in indicator_combination:
+        #     conditions.append(SAR)
+        # if "ADX" in indicator_combination:
+        #     conditions.append(ADX)
+        # if "RSI" in indicator_combination:
+        #     conditions.append(RSI_CROSS_ABOVE)
+        # if "STOCH" in indicator_combination:
+        #     conditions.append(STOCH_CROSS_BELOW)
+        # if "MACD" in indicator_combination:
+        #     conditions.append(BEARISH_MACD)
+        # if "CCI" in indicator_combination:
+        #     conditions.append(CCI)
+        # if "BOLLINGER" in indicator_combination:
+        #     conditions.append(BOLLINGER_CROSS_BELOW)
+        # if "CHAIKIN" in indicator_combination:
+        #     conditions.append(CHAIKIN)
+        # if "OBV" in indicator_combination:
+        #     conditions.append(OBV)
 
 
         if conditions:

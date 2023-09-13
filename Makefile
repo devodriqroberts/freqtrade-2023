@@ -4,43 +4,43 @@ get-days: $(days)
 
 download-data:
 	@echo "Downloading Data..."
-	docker-compose run --rm freqtrade download-data --config user_data/config.json --timeframes 5m 30m 1h --timerange 20220801-
+	docker-compose run --rm freqtrade download-data --config user_data/config.json --timeframes 1h --timerange 20230101-
 
 optimize-all:
 	@echo "Optimizing All Spaces..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 3000 --timerange 20230603-20230902 --timeframe 1h --spaces all
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 3000 --timerange 20230101-20230902 --timeframe 1h --spaces all
 
 optimize-default:
 	@echo "Optimizing Default Spaces..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 3000 --timerange 20230603-20230902 --timeframe 1h --spaces default
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 5000 --timerange 20230101-20230902 --timeframe 1h --spaces default
 
 optimize-buy:
 	@echo "Optimizing Buy Space..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 2000 --timerange 20230603-20230902 --timeframe 1h --spaces buy
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 2000 --timerange 20230101-20230902 --timeframe 1h --spaces buy
 
 optimize-sell:
 	@echo "Optimizing Sell Space..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 2000 --timerange 20230603-20230902 --timeframe 1h --spaces sell
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 2000 --timerange 20230101-20230902 --timeframe 1h --spaces sell
 
 optimize-roi:
 	@echo "Optimizing ROI Space..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 2000 --timerange 20230603-20230902 --timeframe 1h --spaces roi
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 2000 --timerange 20230101-20230902 --timeframe 1h --spaces roi
 
 optimize-stoploss:
 	@echo "Optimizing Stoploss Space..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 300 --timerange 20230603-20230902 --timeframe 1h --spaces stoploss
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 300 --timerange 20230101-20230902 --timeframe 1h --spaces stoploss
 
 optimize-trailing:
 	@echo "Optimizing Trailing Space..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 300 --timerange 20230603-20230902 --timeframe 1h --spaces trailing
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 300 --timerange 20230101-20230902 --timeframe 1h --spaces trailing
 
 optimize-trades:
 	@echo "Optimizing Trades Space..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 100 --timerange 20230603-20230902 --timeframe 1h --spaces trades
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 100 --timerange 20230101-20230902 --timeframe 1h --spaces trades
 
 optimize-protection:
 	@echo "Optimizing Protection Space..."
-	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 300 --timerange 20230603-20230902 --timeframe 1h --spaces protection
+	docker-compose run --rm freqtrade hyperopt --hyperopt-loss CombinedProfitLoss --strategy AwesomeStrategy --config user_data/config.json -e 300 --timerange 20230101-20230902 --timeframe 1h --spaces protection
 
 backtest:
 	@echo "Conducting Backtest..."
@@ -56,3 +56,6 @@ test-pairlist:
 
 optimize-spaces:
 	make optimize-buy & make optimize-sell & make optimize-roi & make optimize-stoploss & make optimize-trailing & make optimize-trades & make optimize-protection
+
+copy_config:
+	scp -i "freqtrade-ec2-access.pem" ./freqtrade-2023-git/user_data/config.json ubuntu@ec2-{ec2-ip}.compute-1.amazonaws.com:/home/ubuntu/freqtrade-2023/user_data/config.json 
